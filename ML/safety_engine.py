@@ -4,8 +4,48 @@ Hard-coded clinical rules based on ACLS/PALS/ESI protocols.
 These rules CANNOT be overridden by ML predictions.
 """
 
+import numpy as np
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+
+
+# Training schema: 30 columns expected by the trained model
+TRAINING_FEATURE_COLUMNS = [
+    'age', 'gender',
+    'heart_rate', 'bp_systolic', 'bp_diastolic', 'spo2', 'temperature', 'respiratory_rate',
+    'chest_pain', 'arm_pain_left', 'jaw_pain', 'dyspnea', 'shortness_of_breath',
+    'facial_droop', 'arm_weakness', 'speech_difficulty', 'abdominal_pain',
+    'rigid_abdomen', 'altered_mental_status', 'confusion', 'fever', 'nausea',
+    'vomiting', 'dizziness', 'syncope', 'headache', 'seizure',
+    'uncontrolled_bleeding', 'severe_pain',
+    'symptom_duration_hours'
+]
+
+
+def patient_to_raw_features(patient_data: Dict[str, Any]) -> np.ndarray:
+    """
+    Convert patient dict to raw 30-feature array matching training schema.
+    
+    This function ensures compatibility with the trained model which expects
+    exactly 30 features in a specific order.
+    """
+    # Convert gender string to int
+    gender = patient_data.get('gender', 0)
+    if isinstance(gender, str):
+        gender = 1 if gender.upper() == 'M' else 0
+    
+    features = []
+    for col in TRAINING_FEATURE_COLUMNS:
+        if col == 'gender':
+            features.append(float(gender))
+        else:
+            val = patient_data.get(col, 0)
+            # Handle boolean symptoms
+            if isinstance(val, bool):
+                val = 1 if val else 0
+            features.append(float(val))
+    
+    return np.array([features])
 
 
 @dataclass
@@ -488,9 +528,9 @@ class ClinicalSafetyEngine:
             }
         
         # LAYER 2: ML Prediction (if available)
-        if self.ml_model is not None and self.feature_engineer is not None:
-            # Extract features
-            features = self.feature_engineer.transform(patient_data)
+        if self.ml_model is not None:
+            # Convert patient data to raw features matching training schema (30 features)
+            features = patient_to_raw_features(patient_data)
             
             # Check for out-of-distribution
             if self.ood_detector.is_fitted:
@@ -510,7 +550,7 @@ class ClinicalSafetyEngine:
                         }]
                     }
             
-            # Get ML prediction
+            # Get ML prediction - use raw features directly (model was trained on 30 columns)
             prediction = self.ml_model.predict_proba(features)[0]
             esi_level = int(np.argmax(prediction)) + 1  # 1-indexed
             confidence = float(np.max(prediction))

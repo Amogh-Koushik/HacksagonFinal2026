@@ -50,10 +50,12 @@ class FeatureEngineer:
         self.is_fitted = True
         return self
     
-    def transform(self, data: Union[pd.DataFrame, Dict]) -> np.ndarray:
+    def transform(self, data: Union[pd.DataFrame, Dict, pd.Series]) -> np.ndarray:
         """Transform patient data into feature vector."""
         if isinstance(data, dict):
             data = pd.DataFrame([data])
+        elif isinstance(data, pd.Series):
+            data = pd.DataFrame([data.to_dict()])
         
         features = []
         self.feature_names = []
