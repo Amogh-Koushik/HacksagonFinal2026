@@ -196,15 +196,8 @@ def test_inference(predictor, sample_cases: list = None):
             print(f"  Protocol: {emergency_result.protocol}")
             predicted = emergency_result.esi_level
         else:
-            # ML prediction - use the same column order as training data
-            # Get feature columns from the predictor's scaler
-            feature_cols = ['age', 'gender', 'heart_rate', 'bp_systolic', 'bp_diastolic', 
-                           'spo2', 'temperature', 'respiratory_rate', 'symptom_duration_hours',
-                           'chest_pain', 'arm_pain_left', 'jaw_pain', 'dyspnea', 'severe_pain',
-                           'facial_droop', 'arm_weakness', 'speech_difficulty', 'altered_mental_status',
-                           'shortness_of_breath', 'dizziness', 'confusion', 'uncontrolled_bleeding',
-                           'fever', 'abdominal_pain', 'nausea', 'vomiting', 'headache', 'syncope',
-                           'cough', 'fatigue']
+            # ML prediction - use the exact column order learned during training
+            feature_cols = predictor.feature_names
             
             # Convert gender string to int if needed
             case_copy = case.copy()
@@ -234,6 +227,8 @@ def main():
     parser.add_argument('--data', type=str, help='Path to training CSV')
     parser.add_argument('--output', type=str, default='models/', help='Output directory')
     parser.add_argument('--synthetic', action='store_true', help='Generate synthetic data for testing')
+    parser.add_argument('--samples', type=int, default=50000,
+                        help='Number of synthetic samples to generate (default: 50000)')
     parser.add_argument('--test-only', action='store_true', help='Only test inference with existing model')
     
     args = parser.parse_args()
@@ -249,15 +244,25 @@ def main():
         return
     
     if args.synthetic:
-        # Generate synthetic data for testing
+        # Generate synthetic data
         from generate_synthetic_data import generate_synthetic_dataset
-        X, y = generate_synthetic_dataset(n_samples=5000)
+        print(f"Generating {args.samples:,} synthetic patients...")
+        X, y = generate_synthetic_dataset(n_samples=args.samples)
+
+        # Save training CSV for later integrity checks
+        import os
+        os.makedirs('data', exist_ok=True)
+        df_save = X.copy()
+        df_save['esi_level'] = y
+        df_save.to_csv('data/training.csv', index=False)
+        df_save.to_csv('data/raw_synthetic.csv', index=False)
+        print(f"  Training data saved to data/training.csv ({len(df_save):,} rows)")
     elif args.data:
         X, y = load_data(args.data)
     else:
         print("Please provide --data PATH or use --synthetic for testing")
         print("Usage: python train.py --data training_data.csv")
-        print("       python train.py --synthetic")
+        print("       python train.py --synthetic --samples 50000")
         return
     
     # Train model

@@ -23,6 +23,7 @@ from config import (
 )
 from safety_engine import EmergencyRuleEngine
 from ood_detector import OutOfDistributionDetector
+from esi_predictor import ESITriagePredictor
 
 
 # =========================================================================
@@ -43,8 +44,9 @@ def load_models():
         print(f"  ERROR: {ood_path} not found!")
         sys.exit(1)
 
-    predictor = joblib.load(ensemble_path)
-    ood_detector = joblib.load(ood_path)
+    # Use proper classmethod to reconstruct predictor object from saved dict
+    predictor = ESITriagePredictor.load(ensemble_path)
+    ood_detector = OutOfDistributionDetector.load(ood_path)
 
     print(f"  Ensemble model loaded from {ensemble_path}")
     print(f"  OOD detector loaded from {ood_path}")
@@ -55,29 +57,11 @@ def load_models():
 # =========================================================================
 #  BUILD FEATURE VECTOR (matches exact training schema)
 # =========================================================================
-def build_feature_vector(patient: dict) -> np.ndarray:
+def build_feature_vector(patient: dict, feature_cols: list) -> np.ndarray:
     """
     Convert a patient dict into the exact feature vector
-    the model was trained on (36 features).
+    the model was trained on using the predictor's saved feature_names.
     """
-
-    # Read the training CSV header to get exact column order
-    training_csv = os.path.join(os.path.dirname(__file__), "data", "training.csv")
-    if os.path.exists(training_csv):
-        df_header = pd.read_csv(training_csv, nrows=0)
-        feature_cols = [c for c in df_header.columns if c != 'esi_level']
-    else:
-        # Fallback: reconstruct from config
-        feature_cols = (
-            DEMOGRAPHIC_FEATURES
-            + VITAL_FEATURES
-            + SYMPTOM_FEATURES
-            + ['symptom_duration_hours',
-               'symptom_count', 'vital_abnormality_count',
-               'has_critical_vital', 'age_bucket',
-               'map_pressure', 'shock_index']
-        )
-
     # Convert gender string to int
     p = patient.copy()
     if isinstance(p.get('gender'), str):
@@ -86,7 +70,7 @@ def build_feature_vector(patient: dict) -> np.ndarray:
     # Fill in defaults
     p.setdefault('symptom_duration_hours', 2.0)
 
-    # Compute enriched features
+    # Compute enriched features that may be in training data
     symptom_count = sum(p.get(s, 0) for s in SYMPTOM_FEATURES)
     p['symptom_count'] = symptom_count
 
@@ -131,7 +115,7 @@ def build_feature_vector(patient: dict) -> np.ndarray:
     hr = p.get('heart_rate', 80)
     p['shock_index'] = round(hr / max(sbp, 1), 3)
 
-    # Build the feature array in the exact column order
+    # Build the feature array using ONLY the columns the model was trained on
     features = [float(p.get(col, 0)) for col in feature_cols]
     return np.array([features]), feature_cols
 
@@ -234,6 +218,7 @@ def run_tests():
     # Step 1: Load models
     print("\n[1] LOADING MODELS")
     predictor, ood_detector = load_models()
+    feature_cols = predictor.feature_names  # Use exact column list from training
 
     # Step 2: Init safety engine
     print("\n[2] INITIALIZING SAFETY ENGINE")
@@ -264,8 +249,8 @@ def run_tests():
             print(f"  >> EMERGENCY RULE: {emergency.rule_name}")
             print(f"  >> Protocol: {emergency.protocol}")
         else:
-            # Layer 2: ML prediction
-            features, col_names = build_feature_vector(patient)
+            # Layer 2: ML prediction — build the exact feature vector
+            features, col_names = build_feature_vector(patient, feature_cols)
             predicted = predictor.predict(features)[0]
             proba = predictor.predict_proba(features)[0]
             confidence = np.max(proba) * 100
@@ -273,13 +258,7 @@ def run_tests():
 
             # Layer 3: OOD check
             try:
-                ood_features = features.copy()
-                # OOD was trained on original features only (before enrichment)
-                # Use all features and let it handle dimensions
-                is_ood = ood_detector.predict(ood_features)
-                if hasattr(is_ood, '__len__') and len(is_ood) > 0:
-                    is_ood = is_ood[0]
-                if is_ood:
+                if ood_detector.is_outlier(features):
                     print(f"  >> OOD WARNING: Patient looks unusual")
             except Exception:
                 pass  # OOD dimension mismatch is non-critical

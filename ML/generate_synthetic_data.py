@@ -192,14 +192,15 @@ def generate_symptoms(esi_level: int) -> Dict:
         'facial_droop', 'arm_weakness', 'speech_difficulty', 'abdominal_pain',
         'rigid_abdomen', 'altered_mental_status', 'confusion', 'fever', 'nausea',
         'vomiting', 'dizziness', 'syncope', 'headache', 'seizure',
-        'uncontrolled_bleeding', 'severe_pain'
+        'uncontrolled_bleeding', 'severe_pain', 'cough', 'fatigue'
     ]
     
     symptoms = {s: 0 for s in all_symptoms}
     
     if esi_level == 1:
         # Critical symptoms - cardiac, stroke, or respiratory
-        scenario = np.random.choice(['cardiac', 'stroke', 'respiratory', 'shock', 'sepsis'])
+        scenario = np.random.choice(['cardiac', 'stroke', 'respiratory', 'shock', 'sepsis'],
+                                    p=[0.25, 0.20, 0.20, 0.20, 0.15])
         
         if scenario == 'cardiac':
             symptoms['chest_pain'] = 1
@@ -231,64 +232,112 @@ def generate_symptoms(esi_level: int) -> Dict:
             symptoms['confusion'] = 1
     
     elif esi_level == 2:
-        # Serious but not immediately life-threatening
-        scenario = np.random.choice(['chest_pain', 'abdominal', 'neuro', 'infection'])
+        # Serious conditions — clear high-acuity symptoms
+        scenario = np.random.choice(
+            ['chest_pain_acs', 'abdominal_severe', 'neuro_acute', 'infection_severe', 'trauma'],
+            p=[0.25, 0.20, 0.20, 0.20, 0.15]
+        )
         
-        if scenario == 'chest_pain':
+        if scenario == 'chest_pain_acs':
             symptoms['chest_pain'] = 1
-            symptoms['dyspnea'] = np.random.choice([0, 1], p=[0.5, 0.5])
+            symptoms['dyspnea'] = np.random.choice([0, 1], p=[0.4, 0.6])
+            symptoms['severe_pain'] = np.random.choice([0, 1], p=[0.3, 0.7])
         
-        elif scenario == 'abdominal':
+        elif scenario == 'abdominal_severe':
             symptoms['abdominal_pain'] = 1
             symptoms['severe_pain'] = 1
-            symptoms['nausea'] = np.random.choice([0, 1], p=[0.3, 0.7])
-            symptoms['vomiting'] = np.random.choice([0, 1], p=[0.4, 0.6])
+            symptoms['nausea'] = np.random.choice([0, 1], p=[0.2, 0.8])
+            symptoms['vomiting'] = np.random.choice([0, 1], p=[0.3, 0.7])
+            symptoms['rigid_abdomen'] = np.random.choice([0, 1], p=[0.5, 0.5])
         
-        elif scenario == 'neuro':
+        elif scenario == 'neuro_acute':
             symptoms['headache'] = 1
-            symptoms['dizziness'] = np.random.choice([0, 1], p=[0.4, 0.6])
-            symptoms['syncope'] = np.random.choice([0, 1], p=[0.6, 0.4])
+            symptoms['dizziness'] = np.random.choice([0, 1], p=[0.3, 0.7])
+            symptoms['syncope'] = np.random.choice([0, 1], p=[0.5, 0.5])
+            symptoms['vomiting'] = np.random.choice([0, 1], p=[0.5, 0.5])
         
-        else:  # infection
+        elif scenario == 'infection_severe':
             symptoms['fever'] = 1
-            symptoms['confusion'] = np.random.choice([0, 1], p=[0.5, 0.5])
+            symptoms['confusion'] = np.random.choice([0, 1], p=[0.4, 0.6])
+            symptoms['altered_mental_status'] = np.random.choice([0, 1], p=[0.5, 0.5])
+        
+        else:  # trauma
+            symptoms['uncontrolled_bleeding'] = 1
+            symptoms['severe_pain'] = 1
     
     elif esi_level == 3:
-        # Urgent conditions
-        scenario = np.random.choice(['abdominal', 'pain', 'respiratory', 'gi'])
+        # Urgent — moderate severity, multiple resource needs
+        scenario = np.random.choice(
+            ['abdominal_mod', 'pain_multi', 'respiratory_mild', 'gi_illness', 'back_pain'],
+            p=[0.25, 0.20, 0.20, 0.20, 0.15]
+        )
         
-        if scenario == 'abdominal':
+        if scenario == 'abdominal_mod':
             symptoms['abdominal_pain'] = 1
-            symptoms['nausea'] = np.random.choice([0, 1], p=[0.4, 0.6])
-        
-        elif scenario == 'pain':
-            symptoms['severe_pain'] = np.random.choice([0, 1], p=[0.5, 0.5])
-            symptoms['headache'] = np.random.choice([0, 1], p=[0.6, 0.4])
-        
-        elif scenario == 'respiratory':
-            symptoms['shortness_of_breath'] = np.random.choice([0, 1], p=[0.4, 0.6])
-            symptoms['fever'] = np.random.choice([0, 1], p=[0.5, 0.5])
-        
-        else:
-            symptoms['nausea'] = 1
+            symptoms['nausea'] = np.random.choice([0, 1], p=[0.3, 0.7])
             symptoms['vomiting'] = np.random.choice([0, 1], p=[0.4, 0.6])
-            symptoms['abdominal_pain'] = np.random.choice([0, 1], p=[0.5, 0.5])
+            symptoms['fever'] = np.random.choice([0, 1], p=[0.6, 0.4])
+        
+        elif scenario == 'pain_multi':
+            symptoms['severe_pain'] = 1
+            symptoms['headache'] = np.random.choice([0, 1], p=[0.5, 0.5])
+            symptoms['nausea'] = np.random.choice([0, 1], p=[0.5, 0.5])
+        
+        elif scenario == 'respiratory_mild':
+            symptoms['shortness_of_breath'] = 1
+            symptoms['cough'] = np.random.choice([0, 1], p=[0.4, 0.6])
+            symptoms['fever'] = np.random.choice([0, 1], p=[0.4, 0.6])
+        
+        elif scenario == 'gi_illness':
+            symptoms['nausea'] = 1
+            symptoms['vomiting'] = 1
+            symptoms['abdominal_pain'] = np.random.choice([0, 1], p=[0.4, 0.6])
+            symptoms['fever'] = np.random.choice([0, 1], p=[0.6, 0.4])
+        
+        else:  # back_pain
+            symptoms['severe_pain'] = 1
+            symptoms['vomiting'] = np.random.choice([0, 1], p=[0.7, 0.3])
     
     elif esi_level == 4:
-        # Less urgent - minor symptoms
-        scenario = np.random.choice(['minor_pain', 'gi', 'other'])
+        # Less urgent — single minor complaint, near-normal vitals
+        scenario = np.random.choice(
+            ['mild_headache', 'minor_gi', 'uri', 'minor_injury', 'back_ache'],
+            p=[0.20, 0.20, 0.25, 0.20, 0.15]
+        )
         
-        if scenario == 'minor_pain':
-            symptoms['headache'] = np.random.choice([0, 1], p=[0.5, 0.5])
-        elif scenario == 'gi':
-            symptoms['nausea'] = np.random.choice([0, 1], p=[0.5, 0.5])
-        # Most symptoms stay 0
+        if scenario == 'mild_headache':
+            symptoms['headache'] = 1
+            # Occasionally mild nausea with headache
+            symptoms['nausea'] = np.random.choice([0, 1], p=[0.7, 0.3])
+        
+        elif scenario == 'minor_gi':
+            symptoms['nausea'] = 1
+            symptoms['vomiting'] = np.random.choice([0, 1], p=[0.6, 0.4])
+        
+        elif scenario == 'uri':  # Upper Respiratory Infection
+            symptoms['cough'] = 1
+            symptoms['fever'] = np.random.choice([0, 1], p=[0.5, 0.5])
+            symptoms['fatigue'] = np.random.choice([0, 1], p=[0.5, 0.5])
+        
+        elif scenario == 'minor_injury':
+            symptoms['severe_pain'] = np.random.choice([0, 1], p=[0.7, 0.3])  # Mild pain
+        
+        else:  # back_ache
+            symptoms['fatigue'] = np.random.choice([0, 1], p=[0.6, 0.4])
     
     else:  # ESI 5
-        # Non-urgent - very minor or no symptoms
-        # Almost all symptoms stay 0
-        if np.random.random() < 0.2:
+        # Non-urgent — minor or no symptoms, stable vitals
+        scenario = np.random.choice(
+            ['no_symptoms', 'mild_cough', 'mild_fatigue', 'minor_headache'],
+            p=[0.50, 0.20, 0.15, 0.15]
+        )
+        if scenario == 'mild_cough':
+            symptoms['cough'] = 1
+        elif scenario == 'mild_fatigue':
+            symptoms['fatigue'] = 1
+        elif scenario == 'minor_headache':
             symptoms['headache'] = 1
+        # 50% of ESI 5 have zero symptoms
     
     return symptoms
 

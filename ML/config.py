@@ -28,10 +28,15 @@ ESI_COLORS = {
 LIGHTGBM_PARAMS = {
     'objective': 'multiclass',
     'num_class': 5,
-    'max_depth': 6,
-    'num_leaves': 31,
-    'learning_rate': 0.05,
-    'n_estimators': 200,
+    'max_depth': 8,           # Increased from 6 — handles complex interactions
+    'num_leaves': 63,         # Increased from 31 — 2^max_depth - 1
+    'learning_rate': 0.03,    # Lowered for better generalisation with more trees
+    'n_estimators': 500,      # Increased from 200 — more trees = better accuracy
+    'min_child_samples': 20,  # Regularisation — prevents overfitting on small ESI classes
+    'reg_alpha': 0.1,         # L1 regularisation
+    'reg_lambda': 0.1,        # L2 regularisation
+    'subsample': 0.8,         # Row subsampling per tree
+    'colsample_bytree': 0.8,  # Feature subsampling per tree
     'class_weight': 'balanced',
     'random_state': 42,
     'verbose': -1,
@@ -39,17 +44,20 @@ LIGHTGBM_PARAMS = {
 }
 
 RANDOM_FOREST_PARAMS = {
-    'n_estimators': 100,
-    'max_depth': 8,
+    'n_estimators': 200,      # Increased from 100
+    'max_depth': 12,          # Increased from 8
+    'min_samples_leaf': 5,    # Regularisation
+    'min_samples_split': 10,  # Regularisation
     'class_weight': 'balanced',
     'random_state': 42,
     'n_jobs': -1,
 }
 
-# Ensemble weights (LightGBM 60%, Random Forest 40%)
+# Ensemble weights (LightGBM 65%, Random Forest 35%)
+# LGB gets more weight as it benefits most from the larger dataset
 ENSEMBLE_WEIGHTS = {
-    'lightgbm': 0.6,
-    'random_forest': 0.4
+    'lightgbm': 0.65,
+    'random_forest': 0.35
 }
 
 # =============================================================================
@@ -87,7 +95,9 @@ SYMPTOM_FEATURES = [
     'headache',
     'seizure',
     'uncontrolled_bleeding',
-    'severe_pain'
+    'severe_pain',
+    'cough',        # Added: URI, lower-acuity respiratory
+    'fatigue',      # Added: ESI 4/5 — tiredness without critical symptoms
 ]
 
 CHIEF_COMPLAINTS = [
