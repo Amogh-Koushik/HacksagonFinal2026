@@ -1,0 +1,137 @@
+# ═══════════════════════════════════════════════
+#  RiskScope AI - .gitignore
+# ═══════════════════════════════════════════════
+
+# ─── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+.eggs/
+*.whl
+dist/
+build/
+*.pyd
+
+# ─── Python Virtual Environments ────────────
+venv/
+env/
+.venv/
+.env/
+ENV/
+__pypackages__/
+
+# ─── Python Testing & Linting ───────────────
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.pytype/
+.ruff_cache/
+
+# ─── Jupyter Notebooks ─────────────────────
+.ipynb_checkpoints/
+
+# ─── Node / Frontend ────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn/
+.pnp.*
+.eslintcache
+
+# ─── Vite / Build Output ───────────────────
+frontend/dist/
+frontend/dist-ssr/
+*.local
+*.map
+
+# ─── IDE / Editor ───────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sw?
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sublime-workspace
+*.sublime-project
+
+# ─── ML / Data Science ─────────────────────
+# Trained model files
+backend/models/*.pkl
+backend/models/*.joblib
+ml/models/
+*.h5
+*.hdf5
+*.pickle
+*.onnx
+*.pt
+*.pth
+*.pb
+
+# Large data files
+ml/data/training_data.csv
+ml/data/*.csv
+*.npy
+*.npz
+*.parquet
+*.feather
+
+# SHAP / explainability outputs
+*.shap
+
+# ─── Synthea (large generated FHIR data) ───
+synthea/
+!synthea/.gitkeep
+
+# ─── Environment / Secrets ──────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+
+# ─── OS Files ───────────────────────────────
+.DS_Store
+Desktop.ini
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ─── Logs & Temp Files ─────────────────────
+*.log
+*.tmp
+*.bak
+*.cache
+*.pid
+
+# ─── AI Assistant / Tooling ─────────────────
+.gemini/
+.cursor/
+.copilot/
+.agents/
+.agent/
+_agents/
+_agent/
+
+# ─── Misc ───────────────────────────────────
+artifacts/
+*.tgz
+*.tar.gz
+*.zip
