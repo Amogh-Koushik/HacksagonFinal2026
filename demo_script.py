@@ -7,7 +7,6 @@
 Run: python demo_script.py
 """
 
-import json
 import time
 import sys
 import os
@@ -226,14 +225,59 @@ def run_demo():
     print_banner()
     time.sleep(1)
 
-    # ── Load demo cases ──────────────────────────────
-    demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo_cases.json")
-    if not os.path.exists(demo_path):
-        print(f"  {Colors.RED}ERROR: demo_cases.json not found at {demo_path}{Colors.RESET}")
-        sys.exit(1)
-
-    with open(demo_path) as f:
-        cases = json.load(f)
+    # ── Demo cases (embedded) ────────────────────────
+    cases = [
+        {
+            "name": "Suspected MI",
+            "expected_esi": 1,
+            "data": {
+                "age": 58, "gender": "M", "chief_complaint": "chest_pain",
+                "heart_rate": 105, "bp_systolic": 160, "bp_diastolic": 95,
+                "spo2": 94, "temperature": 37.2, "resp_rate": 22,
+                "symptoms": {"chest_pain": True, "arm_pain_left": True, "diaphoresis": True}
+            }
+        },
+        {
+            "name": "Stroke FAST+",
+            "expected_esi": 1,
+            "data": {
+                "age": 72, "gender": "F", "chief_complaint": "weakness",
+                "heart_rate": 88, "bp_systolic": 180, "bp_diastolic": 110,
+                "spo2": 96, "temperature": 37.0, "resp_rate": 18,
+                "symptoms": {"facial_droop": True, "arm_weakness": True, "speech_difficulty": True}
+            }
+        },
+        {
+            "name": "Abdominal Pain",
+            "expected_esi": 3,
+            "data": {
+                "age": 35, "gender": "F", "chief_complaint": "abdominal_pain",
+                "heart_rate": 85, "bp_systolic": 120, "bp_diastolic": 80,
+                "spo2": 98, "temperature": 37.5, "resp_rate": 16,
+                "symptoms": {"abdominal_pain": True, "nausea": True}
+            }
+        },
+        {
+            "name": "Minor Laceration",
+            "expected_esi": 4,
+            "data": {
+                "age": 28, "gender": "M", "chief_complaint": "laceration",
+                "heart_rate": 72, "bp_systolic": 118, "bp_diastolic": 75,
+                "spo2": 99, "temperature": 36.8, "resp_rate": 14,
+                "symptoms": {"minor_bleeding": True}
+            }
+        },
+        {
+            "name": "Common Cold",
+            "expected_esi": 5,
+            "data": {
+                "age": 25, "gender": "F", "chief_complaint": "cough",
+                "heart_rate": 70, "bp_systolic": 110, "bp_diastolic": 70,
+                "spo2": 99, "temperature": 37.1, "resp_rate": 15,
+                "symptoms": {"runny_nose": True, "sore_throat": True, "mild_cough": True}
+            }
+        },
+    ]
 
     # ── System Initialization ────────────────────────
     print_section("🔧 SYSTEM INITIALIZATION")
