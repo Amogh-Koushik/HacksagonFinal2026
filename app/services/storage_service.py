@@ -1,10 +1,14 @@
 from datetime import datetime, timezone
+import logging
 from typing import Any
 from uuid import uuid4
 
 from supabase import Client, create_client
 
 from app.core.config import Settings
+
+
+logger = logging.getLogger(__name__)
 
 
 class StorageService:
@@ -14,7 +18,11 @@ class StorageService:
         self._memory_records: list[dict[str, Any]] = []
 
         if settings.supabase_url and settings.supabase_service_role_key:
-            self._supabase = create_client(settings.supabase_url, settings.supabase_service_role_key)
+            try:
+                self._supabase = create_client(settings.supabase_url, settings.supabase_service_role_key)
+            except Exception:
+                logger.exception("Failed to initialize Supabase client; using in-memory storage instead")
+                self._supabase = None
 
     @property
     def mode(self) -> str:
@@ -148,7 +156,7 @@ class StorageService:
                 if result.data:
                     return self._to_frontend_shape(result.data[0])
             except Exception:
-                pass
+                logger.exception("Supabase insert failed; falling back to in-memory storage")
 
         self._memory_records.append(record)
         return self._to_frontend_shape(record)
@@ -166,7 +174,7 @@ class StorageService:
                 )
                 return [self._to_frontend_shape(item) for item in (result.data or [])]
             except Exception:
-                pass
+                logger.exception("Supabase list failed; falling back to in-memory storage")
 
         records = sorted(
             self._memory_records,
@@ -188,7 +196,7 @@ class StorageService:
                     return self._to_frontend_shape(result.data[0])
                 return None
             except Exception:
-                pass
+                logger.exception("Supabase status update failed; falling back to in-memory storage")
 
         for record in self._memory_records:
             if str(record.get("id")) == str(patient_id):
@@ -208,7 +216,7 @@ class StorageService:
                 )
                 return bool(result.data)
             except Exception:
-                pass
+                logger.exception("Supabase delete failed; falling back to in-memory storage")
 
         before = len(self._memory_records)
         self._memory_records = [r for r in self._memory_records if str(r.get("id")) != str(patient_id)]
