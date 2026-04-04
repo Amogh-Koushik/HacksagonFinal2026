@@ -102,7 +102,7 @@
 
 **Request Flow:**
 1. Frontend sends patient vitals + symptoms via `POST /api/v1/predict`
-2. **Layer 1 (Safety Rules):** 20+ clinical rules run first. If any rule matches (e.g., chest pain + arm radiation = suspected MI), the system immediately returns ESI 1 with the specific ACLS protocol — the ML model is bypassed entirely
+2. **Layer 1 (Safety Rules):** 18+ clinical rules run first. If any rule matches (e.g., chest pain + arm radiation = suspected MI), the system immediately returns ESI 1 with the specific ACLS protocol — the ML model is bypassed entirely
 3. **Layer 2 (ML Prediction):** If no emergency rule fires, the `PreprocessingService` engineers features (shock index, SIRS score, qSOFA score, etc.), and the `ModelService` runs a KNN prediction from the serialized model
 4. **Layer 3 (Confidence Calibration):** If the ML model's confidence is below 60%, the ESI level is escalated by 1 (towards more urgent) as a safety measure
 5. The patient record is stored in Supabase (or in-memory fallback) and returned to the frontend
@@ -127,7 +127,7 @@ Training CSV → Feature Engineering → Train/Test Split → Model Training
 
 ### Feature Engineering
 
-The model uses **26+ engineered features** derived from raw patient data:
+The model uses **73+ engineered features** derived from raw patient data:
 
 | Category | Features | Description |
 |----------|----------|-------------|
