@@ -120,6 +120,14 @@ class PatientOut(BaseModel):
     status: Literal["waiting", "treating", "discharged"] = "waiting"
     model_version: str | None = None
 
+    method: str | None = None
+    protocol: str | None = None
+    action: str | None = None
+    rule_triggered: str | None = None
+    escalated: bool = False
+    recommendation: str | None = None
+    explanation: list[dict[str, Any]] | None = None
+
 
 class TriageResponse(BaseModel):
     esi_level: int
@@ -130,6 +138,14 @@ class TriageResponse(BaseModel):
     patient: PatientOut
     model_input_csv: str
     model_input_row: dict[str, Any]
+
+    method: str = "ML_PREDICTION"
+    protocol: str | None = None
+    action: str | None = None
+    rule_triggered: str | None = None
+    escalated: bool = False
+    recommendation: str | None = None
+    explanation: list[dict[str, Any]] | None = None
 
 
 class StatusUpdateRequest(BaseModel):

@@ -91,6 +91,13 @@ class StorageService:
             "confidence": record.get("confidence"),
             "status": record.get("status", "waiting"),
             "model_version": record.get("model_version"),
+            "method": record.get("method"),
+            "protocol": record.get("protocol"),
+            "action": record.get("action"),
+            "rule_triggered": record.get("rule_triggered"),
+            "escalated": record.get("escalated", False),
+            "recommendation": record.get("recommendation"),
+            "explanation": record.get("explanation"),
         }
 
     def _build_storage_record(
@@ -101,6 +108,13 @@ class StorageService:
         model_version: str,
         model_input_row: dict[str, Any],
         model_input_csv: str,
+        method: str | None = None,
+        protocol: str | None = None,
+        action: str | None = None,
+        rule_triggered: str | None = None,
+        escalated: bool = False,
+        recommendation: str | None = None,
+        explanation: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         now = datetime.now(timezone.utc).isoformat()
         def from_payload_or_model(field: str, model_field: str | None = None) -> Any:
@@ -204,6 +218,13 @@ class StorageService:
                 "symptom_duration_hours": payload.get("symptom_duration_hours"),
             },
             "model_input_csv": model_input_csv,
+            "method": method,
+            "protocol": protocol,
+            "action": action,
+            "rule_triggered": rule_triggered,
+            "escalated": escalated,
+            "recommendation": recommendation,
+            "explanation": explanation,
         }
 
     def create_patient(
@@ -214,6 +235,13 @@ class StorageService:
         model_version: str,
         model_input_row: dict[str, Any],
         model_input_csv: str,
+        method: str | None = None,
+        protocol: str | None = None,
+        action: str | None = None,
+        rule_triggered: str | None = None,
+        escalated: bool = False,
+        recommendation: str | None = None,
+        explanation: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         record = self._build_storage_record(
             payload,
@@ -222,6 +250,13 @@ class StorageService:
             model_version,
             model_input_row,
             model_input_csv,
+            method=method,
+            protocol=protocol,
+            action=action,
+            rule_triggered=rule_triggered,
+            escalated=escalated,
+            recommendation=recommendation,
+            explanation=explanation,
         )
 
         if self._supabase:
