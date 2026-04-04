@@ -78,7 +78,7 @@
 │                     BACKEND (FastAPI)                            │
 │                                                                  │
 │  ┌─── Layer 1: Safety Service ───────────────────────────────┐  │
-│  │  20+ Emergency Rules (MI, Stroke, Sepsis, Shock, etc.)    │  │
+│  │  18+ Emergency Rules (MI, Stroke, Sepsis, Shock, etc.)    │  │
 │  │  If triggered → ESI 1 or 2 immediately, skip ML           │  │
 │  └───────────────────────────────┬───────────────────────────┘  │
 │                                  │ (only if no rule fires)       │
