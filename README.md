@@ -54,7 +54,7 @@
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **ML Training** | Python, LightGBM, XGBoost, scikit-learn, SMOTE | Ensemble model training with class balancing |
-| **ML Safety** | Custom Python (rule engine) | 20+ clinical emergency rules |
+| **ML Safety** | Custom Python (rule engine) | 18+ clinical emergency rules |
 | **Explainability** | SHAP | Human-readable prediction explanations |
 | **OOD Detection** | Isolation Forest (scikit-learn) | Detects out-of-distribution patients |
 | **Backend API** | FastAPI, Uvicorn, Pydantic | REST API serving predictions |
