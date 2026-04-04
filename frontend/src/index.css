@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  --color-medical-50: #f0f7ff;
+  --color-medical-100: #e0efff;
+  --color-medical-200: #b9dfff;
+  --color-medical-300: #7cc4ff;
+  --color-medical-400: #36a9ff;
+  --color-medical-500: #0c8ce9;
+  --color-medical-600: #006fca;
+  --color-medical-700: #0058a3;
+  --color-medical-800: #034b86;
+  --color-medical-900: #083f6f;
+
+  --color-clinical-50: #edfcf2;
+  --color-clinical-100: #d3f9e0;
+  --color-clinical-200: #aaf0c6;
+  --color-clinical-300: #73e3a5;
+  --color-clinical-400: #3ace7f;
+  --color-clinical-500: #17b463;
+  --color-clinical-600: #0c924f;
+  --color-clinical-700: #0a7541;
+
+  --color-critical-50: #fff5f5;
+  --color-critical-100: #ffe0e0;
+  --color-critical-200: #ffc7c7;
+  --color-critical-400: #f87171;
+  --color-critical-500: #ef4444;
+  --color-critical-600: #dc2626;
+  --color-critical-700: #b91c1c;
+  --color-critical-800: #7f1d1d;
+  --color-critical-900: #450a0a;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #92400e;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Pulse animation for critical indicators */
+@keyframes pulse-critical {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-critical {
+  animation: pulse-critical 1.5s ease-in-out infinite;
+}
+
+/* ESI 1-2: Red pulse alert animation */
+@keyframes esi-critical-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+.animate-esi-critical {
+  animation: esi-critical-pulse 2s ease-in-out infinite;
+}
+
+/* ESI 1-2: Alert icon blink */
+@keyframes alert-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.animate-alert-blink {
+  animation: alert-blink 0.8s ease-in-out infinite;
+}
+
+/* ESI 5: Calm breathing animation */
+@keyframes calm-breathe {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(23, 180, 99, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px rgba(23, 180, 99, 0.15);
+    transform: scale(1.02);
+  }
+}
+.animate-calm-breathe {
+  animation: calm-breathe 3s ease-in-out infinite;
+}
+
+/* ESI 5: Soft green glow */
+@keyframes green-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(23, 180, 99, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(23, 180, 99, 0.25);
+  }
+}
+.animate-green-glow {
+  animation: green-glow 3s ease-in-out infinite;
+}
+
+/* Stable indicator pulse */
+@keyframes stable-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-stable-pulse {
+  animation: stable-pulse 2.5s ease-in-out infinite;
+}

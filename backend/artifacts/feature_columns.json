@@ -1,0 +1,20 @@
+[
+  "age",
+  "gender_encoded",
+  "heart_rate",
+  "bp_systolic",
+  "bp_diastolic",
+  "spo2",
+  "temperature",
+  "resp_rate",
+  "complaint_encoded",
+  "sirs_score",
+  "qsofa_score",
+  "shock_index",
+  "age_group",
+  "critical_spo2",
+  "tachycardia",
+  "hypotension",
+  "high_fever",
+  "tachypnea"
+]
