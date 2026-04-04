@@ -1,6 +1,30 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion as Motion, AnimatePresence } from 'framer-motion'
 import { X, AlertTriangle, Heart, Wind, Gauge, Thermometer, Activity, Shield, User, Hash } from 'lucide-react'
 import { ESI_LABELS, ESI_COLORS } from '../utils/esiCalculator'
+
+const SYMPTOM_FLAGS = [
+  ['Chest Pain', 'chest_pain'],
+  ['Arm Pain (Left)', 'arm_pain_left'],
+  ['Jaw Pain', 'jaw_pain'],
+  ['Dyspnea', 'dyspnea'],
+  ['Shortness of Breath', 'shortness_of_breath'],
+  ['Facial Droop', 'facial_droop'],
+  ['Arm Weakness', 'arm_weakness'],
+  ['Speech Difficulty', 'speech_difficulty'],
+  ['Abdominal Pain', 'abdominal_pain'],
+  ['Rigid Abdomen', 'rigid_abdomen'],
+  ['Altered Mental Status', 'altered_mental_status'],
+  ['Confusion', 'confusion'],
+  ['Fever', 'fever'],
+  ['Nausea', 'nausea'],
+  ['Vomiting', 'vomiting'],
+  ['Dizziness', 'dizziness'],
+  ['Syncope', 'syncope'],
+  ['Headache', 'headache'],
+  ['Seizure', 'seizure'],
+  ['Uncontrolled Bleeding', 'uncontrolled_bleeding'],
+  ['Severe Pain', 'severe_pain'],
+]
 
 function formatValue(val, suffix = '') {
   if (val === null || val === undefined || val === '') return 'N/A'
@@ -31,51 +55,51 @@ function ParamRow({ label, value, icon: Icon, iconColor = 'text-slate-400' }) {
 function ESIVisualIndicator({ esi }) {
   if (esi <= 2) {
     return (
-      <motion.div
+      <Motion.div
         className="relative rounded-2xl overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         {/* Red pulse background */}
-        <motion.div
+        <Motion.div
           className="absolute inset-0 bg-critical-500/10 rounded-2xl"
           animate={{ opacity: [0.3, 0.8, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         />
         <div className="relative px-6 py-5 flex items-center gap-4">
-          <motion.div
+          <Motion.div
             className="w-14 h-14 rounded-xl bg-critical-600 flex items-center justify-center shadow-lg shadow-critical-500/30"
             animate={{ scale: [1, 1.08, 1] }}
             transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
           >
             <span className="text-white text-xl font-black">{esi}</span>
-          </motion.div>
+          </Motion.div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-critical-800">{ESI_LABELS[esi].label}</h3>
-              <motion.div
+              <Motion.div
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 0.8, repeat: Infinity }}
               >
                 <AlertTriangle className="w-5 h-5 text-critical-500" />
-              </motion.div>
+              </Motion.div>
             </div>
             <p className="text-sm text-critical-600 mt-0.5">{ESI_LABELS[esi].description}</p>
           </div>
         </div>
-      </motion.div>
+      </Motion.div>
     )
   }
 
   if (esi === 5) {
     return (
-      <motion.div
+      <Motion.div
         className="relative rounded-2xl overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         {/* Gentle green breathing glow */}
-        <motion.div
+        <Motion.div
           className="absolute inset-0 rounded-2xl"
           style={{
             background: 'radial-gradient(ellipse at center, rgba(23, 180, 99, 0.1), transparent 70%)',
@@ -84,27 +108,27 @@ function ESIVisualIndicator({ esi }) {
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         />
         <div className="relative px-6 py-5 flex items-center gap-4">
-          <motion.div
+          <Motion.div
             className="w-14 h-14 rounded-xl bg-clinical-500 flex items-center justify-center shadow-lg shadow-clinical-400/20"
             animate={{ scale: [1, 1.03, 1] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           >
             <span className="text-white text-xl font-black">{esi}</span>
-          </motion.div>
+          </Motion.div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-clinical-700">{ESI_LABELS[esi].label}</h3>
-              <motion.div
+              <Motion.div
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               >
                 <Shield className="w-4 h-4 text-clinical-400" />
-              </motion.div>
+              </Motion.div>
             </div>
             <p className="text-sm text-clinical-600 mt-0.5">{ESI_LABELS[esi].description}</p>
           </div>
         </div>
-      </motion.div>
+      </Motion.div>
     )
   }
 
@@ -133,7 +157,7 @@ export default function PatientDetailsPanel({ patient, onClose }) {
       {patient && (
         <>
           {/* Backdrop */}
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -143,7 +167,7 @@ export default function PatientDetailsPanel({ patient, onClose }) {
           />
 
           {/* Panel */}
-          <motion.div
+          <Motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -194,6 +218,7 @@ export default function PatientDetailsPanel({ patient, onClose }) {
               <div className="px-6 py-4 border-b border-slate-100">
                 <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Demographics</h3>
                 <ParamRow label="Age" value={formatValue(patient.age, ' yrs')} icon={User} iconColor="text-medical-400" />
+                <ParamRow label="Gender" value={formatValue(patient.gender)} icon={User} iconColor="text-medical-400" />
                 <ParamRow label="Gender (Encoded)" value={formatValue(patient.gender_encoded)} icon={User} iconColor="text-medical-400" />
                 <ParamRow label="Age Group" value={formatValue(patient.age_group)} />
               </div>
@@ -206,31 +231,47 @@ export default function PatientDetailsPanel({ patient, onClose }) {
                 <ParamRow label="BP Diastolic" value={formatValue(patient.bp_diastolic, ' mmHg')} icon={Gauge} iconColor="text-medical-400" />
                 <ParamRow label="SpO₂" value={formatValue(patient.spo2, '%')} icon={Wind} iconColor="text-clinical-500" />
                 <ParamRow label="Temperature" value={formatValue(patient.temperature, '°C')} icon={Thermometer} iconColor="text-warning-500" />
-                <ParamRow label="Resp Rate" value={formatValue(patient.resp_rate, ' /min')} icon={Activity} iconColor="text-medical-400" />
+                <ParamRow label="Respiratory Rate" value={formatValue(patient.respiratory_rate ?? patient.resp_rate, ' /min')} icon={Activity} iconColor="text-medical-400" />
               </div>
 
               {/* Clinical Scores */}
               <div className="px-6 py-4 border-b border-slate-100">
                 <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Clinical Scores</h3>
-                <ParamRow label="Complaint" value={formatValue(patient.complaint || patient.complaint_encoded)} />
+                <ParamRow label="Complaint" value={formatValue(patient.complaint)} />
+                <ParamRow label="Complaint Encoded" value={formatValue(patient.complaint_encoded)} />
                 <ParamRow label="SIRS Score" value={formatValue(patient.sirs_score)} />
                 <ParamRow label="qSOFA Score" value={formatValue(patient.qsofa_score)} />
                 <ParamRow label="Shock Index" value={formatValue(patient.shock_index)} />
+                <ParamRow label="Symptom Duration" value={formatValue(patient.symptom_duration_hours, ' hrs')} />
+              </div>
+
+              <div className="px-6 py-4 border-b border-slate-100">
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Model Output</h3>
+                <ParamRow label="ESI Level" value={formatValue(patient.esi)} />
+                <ParamRow label="Confidence" value={formatValue(patient.confidence)} />
+                <ParamRow label="Model Version" value={formatValue(patient.model_version)} />
+                <ParamRow label="Status" value={formatValue(patient.status)} />
               </div>
 
               {/* Clinical Flags */}
               <div className="px-6 py-4">
                 <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Clinical Flags</h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 mb-3">
                   <FlagBadge label="Critical SpO₂" value={patient.critical_spo2} />
                   <FlagBadge label="Tachycardia" value={patient.tachycardia} />
                   <FlagBadge label="Hypotension" value={patient.hypotension} />
                   <FlagBadge label="High Fever" value={patient.high_fever} />
                   <FlagBadge label="Tachypnea" value={patient.tachypnea} />
                 </div>
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Symptom Flags</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {SYMPTOM_FLAGS.map(([label, key]) => (
+                    <FlagBadge key={key} label={label} value={patient[key]} />
+                  ))}
+                </div>
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
         </>
       )}
     </AnimatePresence>

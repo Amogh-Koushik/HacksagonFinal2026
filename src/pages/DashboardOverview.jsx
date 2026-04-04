@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { usePatients } from '../contexts/PatientContext'
 import { ESI_LABELS } from '../utils/esiCalculator'
@@ -12,7 +12,8 @@ import {
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } }
 const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } }
 
-function StatCard({ icon: Icon, label, value, sub, color }) {
+function StatCard({ icon, label, value, sub, color }) {
+  const Icon = icon
   const cls = {
     blue: 'bg-medical-50 text-medical-600 border-medical-100',
     red: 'bg-critical-50 text-critical-600 border-critical-100',
@@ -20,18 +21,18 @@ function StatCard({ icon: Icon, label, value, sub, color }) {
     amber: 'bg-warning-50 text-warning-600 border-warning-100',
   }
   return (
-    <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200/60 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200/60 p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-[13px] text-slate-500 font-medium">{label}</p>
-          <p className="text-3xl font-bold text-slate-800 mt-1.5 tracking-tight">{value}</p>
+          <p className="text-2xl md:text-3xl font-bold text-slate-800 mt-1.5 tracking-tight">{value}</p>
           {sub && <p className="text-[11px] text-slate-400 mt-1">{sub}</p>}
         </div>
         <div className={`w-11 h-11 rounded-xl border flex items-center justify-center ${cls[color]}`}>
           <Icon className="w-5 h-5" />
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   )
 }
 
@@ -48,14 +49,14 @@ export default function DashboardOverview() {
   const now = new Date()
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show">
-      <motion.div variants={fadeUp} className="mb-8">
+    <Motion.div variants={stagger} initial="hidden" animate="show">
+      <Motion.div variants={fadeUp} className="mb-6 md:mb-8">
         <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Dashboard Overview</h1>
         <p className="text-slate-500 text-sm mt-1">AI-assisted emergency triage monitoring</p>
-      </motion.div>
+      </Motion.div>
 
       {/* Info Banner */}
-      <motion.div variants={fadeUp} className="mb-6 bg-medical-50/60 border border-medical-100 rounded-2xl p-5 flex items-start gap-4">
+      <Motion.div variants={fadeUp} className="mb-6 bg-medical-50/60 border border-medical-100 rounded-2xl p-4 md:p-5 flex items-start gap-3 md:gap-4">
         <div className="w-10 h-10 rounded-xl bg-medical-100 flex items-center justify-center shrink-0">
           <Stethoscope className="w-5 h-5 text-medical-600" />
         </div>
@@ -67,10 +68,10 @@ export default function DashboardOverview() {
             so critically ill patients are treated first.
           </p>
         </div>
-      </motion.div>
+      </Motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <StatCard icon={Users} label="Patients Waiting" value={stats.totalWaiting} sub="In queue" color="blue" />
         <StatCard icon={AlertTriangle} label="Critical Patients" value={stats.criticalCount} sub="ESI 1–2 priority" color="red" />
         <StatCard icon={TrendingUp} label="Avg. Risk Level" value={`ESI ${stats.avgRiskLevel}`} sub="Lower = more critical" color="amber" />
@@ -82,9 +83,9 @@ export default function DashboardOverview() {
 
       {/* Critical Alert */}
       {criticalPatients.length > 0 && (
-        <motion.div variants={fadeUp} className="mb-8">
+        <Motion.div variants={fadeUp} className="mb-8">
           <div className="bg-critical-50 border border-critical-200 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-critical-100 flex items-center justify-between">
+            <div className="px-4 md:px-6 py-4 border-b border-critical-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-critical-500 animate-pulse-critical" />
                 <h3 className="text-sm font-semibold text-critical-800">Critical — Immediate Attention Required</h3>
@@ -98,7 +99,7 @@ export default function DashboardOverview() {
               {criticalPatients.map(p => {
                 const waitMin = Math.round((now - new Date(p.addedAt)) / 60000)
                 return (
-                  <div key={p.id} className="px-6 py-3.5 flex items-center justify-between">
+                  <div key={p.id} className="px-4 md:px-6 py-3.5 flex items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-4">
                       <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold text-white ${p.esi === 1 ? 'bg-critical-600' : 'bg-orange-500'}`}>
                         {p.esi}
@@ -116,13 +117,13 @@ export default function DashboardOverview() {
               })}
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       )}
 
       {/* ESI Reference */}
-      <motion.div variants={fadeUp}>
+      <Motion.div variants={fadeUp}>
         <h3 className="text-sm font-semibold text-slate-700 mb-3">ESI Reference Guide</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
           {[1,2,3,4,5].map(level => {
             const info = ESI_LABELS[level]
             const count = patients.filter(p => p.esi === level).length
@@ -140,7 +141,7 @@ export default function DashboardOverview() {
             )
           })}
         </div>
-      </motion.div>
-    </motion.div>
+      </Motion.div>
+    </Motion.div>
   )
 }
