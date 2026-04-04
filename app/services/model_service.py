@@ -27,7 +27,17 @@ class ModelService:
                 f"Model is not loaded. Place your file at: {self.model_path}"
             )
 
-        row = [features[key] for key in features.keys()]
+        model_feature_columns = getattr(self._model, "feature_columns", None)
+        if isinstance(model_feature_columns, list) and model_feature_columns:
+            missing = [col for col in model_feature_columns if col not in features]
+            if missing:
+                raise RuntimeError(
+                    "Model input is missing required features: " + ", ".join(missing)
+                )
+            row = [features[col] for col in model_feature_columns]
+        else:
+            row = [features[key] for key in features.keys()]
+
         y_pred = self._model.predict([row])
         label = int(y_pred[0])
 

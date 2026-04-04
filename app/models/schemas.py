@@ -9,12 +9,14 @@ class TriageRequest(BaseModel):
     name: str | None = None
 
     age: int | None = None
+    gender: Literal["M", "F"] | None = None
     gender_encoded: int | None = None
     heart_rate: int | None = None
     bp_systolic: int | None = None
     bp_diastolic: int | None = None
     spo2: float | None = None
     temperature: float | None = None
+    respiratory_rate: int | None = None
     resp_rate: int | None = None
     complaint: str | None = None
     complaint_encoded: int | None = None
@@ -28,6 +30,29 @@ class TriageRequest(BaseModel):
     hypotension: int = 0
     high_fever: int = 0
     tachypnea: int = 0
+
+    chest_pain: int = 0
+    arm_pain_left: int = 0
+    jaw_pain: int = 0
+    dyspnea: int = 0
+    shortness_of_breath: int = 0
+    facial_droop: int = 0
+    arm_weakness: int = 0
+    speech_difficulty: int = 0
+    abdominal_pain: int = 0
+    rigid_abdomen: int = 0
+    altered_mental_status: int = 0
+    confusion: int = 0
+    fever: int = 0
+    nausea: int = 0
+    vomiting: int = 0
+    dizziness: int = 0
+    syncope: int = 0
+    headache: int = 0
+    seizure: int = 0
+    uncontrolled_bleeding: int = 0
+    severe_pain: int = 0
+    symptom_duration_hours: float | None = None
 
     notes: str | None = None
     symptoms: str | None = None
@@ -42,12 +67,14 @@ class PatientOut(BaseModel):
     name: str | None = None
 
     age: int | None = None
+    gender: Literal["M", "F"] | None = None
     gender_encoded: int | None = None
     heart_rate: int | None = None
     bp_systolic: int | None = None
     bp_diastolic: int | None = None
     spo2: float | None = None
     temperature: float | None = None
+    respiratory_rate: int | None = None
     resp_rate: int | None = None
     complaint: str | None = None
     complaint_encoded: int | None = None
@@ -61,6 +88,29 @@ class PatientOut(BaseModel):
     hypotension: int = 0
     high_fever: int = 0
     tachypnea: int = 0
+
+    chest_pain: int = 0
+    arm_pain_left: int = 0
+    jaw_pain: int = 0
+    dyspnea: int = 0
+    shortness_of_breath: int = 0
+    facial_droop: int = 0
+    arm_weakness: int = 0
+    speech_difficulty: int = 0
+    abdominal_pain: int = 0
+    rigid_abdomen: int = 0
+    altered_mental_status: int = 0
+    confusion: int = 0
+    fever: int = 0
+    nausea: int = 0
+    vomiting: int = 0
+    dizziness: int = 0
+    syncope: int = 0
+    headache: int = 0
+    seizure: int = 0
+    uncontrolled_bleeding: int = 0
+    severe_pain: int = 0
+    symptom_duration_hours: float | None = None
 
     notes: str | None = None
     symptoms: str | None = None
