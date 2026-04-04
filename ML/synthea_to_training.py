@@ -30,7 +30,7 @@ from config import SYMPTOM_FEATURES, VITAL_FEATURES, CRITICAL_THRESHOLDS
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  LOINC CODE → VITAL SIGN MAPPING
+#  LOINC CODE -> VITAL SIGN MAPPING
 #  These are the standard LOINC codes Synthea uses in observations.csv
 # ═══════════════════════════════════════════════════════════════════════════════
 LOINC_TO_VITAL = {
@@ -50,7 +50,7 @@ LOINC_TO_VITAL = {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  SNOMED CODE → SYMPTOM FLAG MAPPING
+#  SNOMED CODE -> SYMPTOM FLAG MAPPING
 #  Maps Synthea condition SNOMED codes to our 21 binary symptom columns
 # ═══════════════════════════════════════════════════════════════════════════════
 SNOMED_TO_SYMPTOM = {
@@ -99,7 +99,7 @@ SNOMED_TO_SYMPTOM = {
     '21522001':  'abdominal_pain',      # Abdominal pain
     '396275006': 'abdominal_pain',      # Osteoarthritis (sometimes coded)
     '65966004':  'abdominal_pain',      # Fracture (abdominal area)
-    '43878008':  'rigid_abdomen',       # Peritonitis → rigid abdomen
+    '43878008':  'rigid_abdomen',       # Peritonitis -> rigid abdomen
     '197480006': 'abdominal_pain',      # Acute appendicitis
     '444814009': 'abdominal_pain',      # Viral sinusitis (mismap guard)
     '235595009': 'abdominal_pain',      # Gastroesophageal reflux
@@ -127,10 +127,10 @@ SNOMED_TO_SYMPTOM = {
     '239873007': 'severe_pain',         # Osteoarthritis of knee (pain)
 }
 
-# SNOMED codes that are stroke-related → set multiple FAST flags
+# SNOMED codes that are stroke-related -> set multiple FAST flags
 STROKE_SNOMED_CODES = {'230690007', '230691006'}
 
-# SNOMED codes that are MI-related → set radiation flags
+# SNOMED codes that are MI-related -> set radiation flags
 MI_SNOMED_CODES = {'22298006', '413838009'}
 
 
@@ -143,12 +143,12 @@ def load_synthea_csvs(synthea_dir: str) -> dict:
     required_files = ['patients.csv', 'encounters.csv', 'observations.csv', 'conditions.csv']
     csvs = {}
 
-    print(f"\n  📂 Loading Synthea CSVs from: {synthea_dir}")
+    print(f"\n   Loading Synthea CSVs from: {synthea_dir}")
 
     for fname in required_files:
         fpath = os.path.join(synthea_dir, fname)
         if not os.path.exists(fpath):
-            print(f"  ❌ Missing: {fpath}")
+            print(f"  [X] Missing: {fpath}")
             sys.exit(1)
         df = pd.read_csv(fpath)
         key = fname.replace('.csv', '')
@@ -174,17 +174,17 @@ def filter_emergency_encounters(csvs: dict) -> pd.DataFrame:
             break
 
     if class_col is None:
-        print("  ⚠️  No ENCOUNTERCLASS column found. Using all encounters.")
+        print("  [!]  No ENCOUNTERCLASS column found. Using all encounters.")
         return encounters
 
     # Filter for emergency / urgentcare / inpatient (they all go through triage)
     ed_mask = encounters[class_col].str.lower().isin(['emergency', 'urgentcare', 'inpatient'])
     ed_encounters = encounters[ed_mask].copy()
 
-    print(f"\n  🏥 Encounters: {len(encounters):,} total → {len(ed_encounters):,} emergency/urgent/inpatient")
+    print(f"\n  [HOSPITAL] Encounters: {len(encounters):,} total -> {len(ed_encounters):,} emergency/urgent/inpatient")
 
     if len(ed_encounters) == 0:
-        print("  ⚠️  No emergency encounters found! Falling back to all encounters.")
+        print("  [!]  No emergency encounters found! Falling back to all encounters.")
         return encounters
 
     return ed_encounters
@@ -234,7 +234,7 @@ def extract_demographics(csvs: dict, encounters: pd.DataFrame) -> pd.DataFrame:
     # Keep encounter ID for joining
     merged['encounter_id'] = merged[enc_id_col]
 
-    print(f"  👤 Demographics: age range {merged['age'].min()}-{merged['age'].max()}, "
+    print(f"   Demographics: age range {merged['age'].min()}-{merged['age'].max()}, "
           f"{(merged['gender']==1).sum()} male / {(merged['gender']==0).sum()} female")
 
     return merged
@@ -254,7 +254,7 @@ def extract_vitals(csvs: dict, encounter_ids: set) -> pd.DataFrame:
     value_col = next((c for c in obs.columns if c.upper() == 'VALUE'), None)
 
     if not all([enc_col, code_col, value_col]):
-        print("  ❌ Cannot find required columns in observations.csv")
+        print("  [X] Cannot find required columns in observations.csv")
         return pd.DataFrame()
 
     # Filter to vital-sign LOINC codes only
@@ -305,7 +305,7 @@ def extract_symptoms(csvs: dict, encounter_ids: set) -> pd.DataFrame:
     code_col = next((c for c in conds.columns if c.upper() == 'CODE'), None)
 
     if not all([enc_col, code_col]):
-        print("  ❌ Cannot find required columns in conditions.csv")
+        print("  [X] Cannot find required columns in conditions.csv")
         return pd.DataFrame()
 
     # Filter to our encounters
@@ -331,14 +331,14 @@ def extract_symptoms(csvs: dict, encounter_ids: set) -> pd.DataFrame:
                 if symptom_name in SYMPTOM_FEATURES:
                     row[symptom_name] = 1
 
-            # Special: stroke → set multiple FAST flags
+            # Special: stroke -> set multiple FAST flags
             if code in STROKE_SNOMED_CODES:
                 row['facial_droop'] = 1
                 row['arm_weakness'] = 1
                 row['speech_difficulty'] = 1
                 row['altered_mental_status'] = np.random.choice([0, 1], p=[0.3, 0.7])
 
-            # Special: MI → set radiation flags
+            # Special: MI -> set radiation flags
             if code in MI_SNOMED_CODES:
                 row['chest_pain'] = 1
                 row['arm_pain_left'] = np.random.choice([0, 1], p=[0.3, 0.7])
@@ -353,7 +353,7 @@ def extract_symptoms(csvs: dict, encounter_ids: set) -> pd.DataFrame:
     # Count how many encounters had at least one symptom
     symptom_cols = [c for c in symptoms_df.columns if c in SYMPTOM_FEATURES]
     has_symptom = (symptoms_df[symptom_cols].sum(axis=1) > 0).sum()
-    print(f"  🩺 Symptoms: {has_symptom:,}/{len(symptoms_df):,} encounters have ≥1 symptom mapped")
+    print(f"  [MEDICAL] Symptoms: {has_symptom:,}/{len(symptoms_df):,} encounters have ≥1 symptom mapped")
 
     return symptoms_df
 
@@ -522,7 +522,7 @@ def generate_symptom_duration(esi_level: int) -> float:
 #  MAIN PIPELINE
 # ═══════════════════════════════════════════════════════════════════════════════
 def parse_synthea(synthea_dir: str, output_path: str = "data/synthea_processed.csv"):
-    """Full Synthea → training format conversion pipeline."""
+    """Full Synthea -> training format conversion pipeline."""
 
     print("=" * 64)
     print("  RiskScope AI — Synthea Data Parser")
@@ -538,18 +538,18 @@ def parse_synthea(synthea_dir: str, output_path: str = "data/synthea_processed.c
     # ── Get encounter IDs ──────────────────────────────────────────────────
     enc_id_col = next((c for c in ed_encounters.columns if c.upper() == 'ID'), ed_encounters.columns[0])
     encounter_ids = set(ed_encounters[enc_id_col].values)
-    print(f"  📋 Processing {len(encounter_ids):,} encounters")
+    print(f"  [DOC] Processing {len(encounter_ids):,} encounters")
 
     # ── Extract demographics ───────────────────────────────────────────────
     print("\n[1/4] EXTRACTING DEMOGRAPHICS")
     demo_df = extract_demographics(csvs, ed_encounters)
 
     # ── Extract vitals ─────────────────────────────────────────────────────
-    print("\n[2/4] EXTRACTING VITALS (LOINC → columns)")
+    print("\n[2/4] EXTRACTING VITALS (LOINC -> columns)")
     vitals_df = extract_vitals(csvs, encounter_ids)
 
     # ── Extract symptoms ───────────────────────────────────────────────────
-    print("\n[3/4] EXTRACTING SYMPTOMS (SNOMED → flags)")
+    print("\n[3/4] EXTRACTING SYMPTOMS (SNOMED -> flags)")
     symptoms_df = extract_symptoms(csvs, encounter_ids)
 
     # ── Merge everything ───────────────────────────────────────────────────
@@ -589,7 +589,7 @@ def parse_synthea(synthea_dir: str, output_path: str = "data/synthea_processed.c
             final[sym] = final[sym].fillna(0).astype(int)
 
     # ── Derive ESI levels ──────────────────────────────────────────────────
-    print("  🏷️  Deriving ESI levels from vitals + symptoms …")
+    print("  [TAG]  Deriving ESI levels from vitals + symptoms …")
     final['esi_level'] = final.apply(derive_esi_level, axis=1)
 
     # ── Add symptom duration ───────────────────────────────────────────────
@@ -614,7 +614,7 @@ def parse_synthea(synthea_dir: str, output_path: str = "data/synthea_processed.c
     # Already excluded from output_columns
 
     # ── Print distribution ─────────────────────────────────────────────────
-    print(f"\n  📊 ESI DISTRIBUTION")
+    print(f"\n  [CHART] ESI DISTRIBUTION")
     total = len(final)
     for esi in range(1, 6):
         count = (final['esi_level'] == esi).sum()
@@ -626,8 +626,8 @@ def parse_synthea(synthea_dir: str, output_path: str = "data/synthea_processed.c
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     final.to_csv(output_path, index=False)
 
-    print(f"\n  ✅ Saved {len(final):,} rows × {len(final.columns)} cols → {output_path}")
-    print(f"  📦 File size: {os.path.getsize(output_path) / (1024*1024):.1f} MB")
+    print(f"\n  [OK] Saved {len(final):,} rows × {len(final.columns)} cols -> {output_path}")
+    print(f"   File size: {os.path.getsize(output_path) / (1024*1024):.1f} MB")
     print("=" * 64)
 
     return final

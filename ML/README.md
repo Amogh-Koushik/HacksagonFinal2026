@@ -1,10 +1,10 @@
 # RiskScope AI - Machine Learning Module
 
-## 🎯 Overview
+## [AIM] Overview
 
 This module contains the core ML pipeline for Emergency Severity Index (ESI) prediction. The system uses a multi-layer safety architecture to ensure accurate and safe patient triage.
 
-## 📁 Structure
+## [FOLDER] Structure
 
 ```
 ML/
@@ -21,7 +21,7 @@ ML/
 └── requirements.txt         # Dependencies
 ```
 
-## 🚀 Quick Start
+## [LAUNCH] Quick Start
 
 ### 1. Install Dependencies
 
@@ -48,7 +48,7 @@ python train.py --synthetic
 python train.py --data path/to/training_data.csv
 ```
 
-## 🏗️ Architecture
+## [BUILD] Architecture
 
 ### 3-Layer Safety System
 
@@ -92,7 +92,7 @@ Patient Data
 | Explainability | SHAP | "Why this ESI level?" |
 | Preprocessing | StandardScaler | Normalize features |
 
-## 📊 Features (73+)
+## [CHART] Features (73+)
 
 ### Demographics (5)
 - Age, age groups (pediatric, adult, elderly), gender
@@ -129,17 +129,17 @@ Patient Data
 - Symptom duration
 - Is acute, rapid onset, chronic
 
-## 🎯 Target Metrics
+## [AIM] Target Metrics
 
 | Metric | Target | Importance |
 |--------|--------|------------|
 | Cohen's Kappa | ≥ 0.75 | Excellent agreement with nurses |
 | ESI 1-2 Sensitivity | ≥ 95% | Must catch emergencies |
 | ESI 1-2 Specificity | ≥ 75% | Avoid over-triage |
-| Critical Errors | < 0.5% | Level 1 → Level 4+ mistakes |
+| Critical Errors | < 0.5% | Level 1 -> Level 4+ mistakes |
 | Response Time | < 500ms | Real-time use |
 
-## 🔧 Usage
+## [TOOL] Usage
 
 ### Training
 
@@ -193,7 +193,7 @@ for exp in explanation:
     print(f"{exp['impact']} {exp['feature']}: {exp['value']}")
 ```
 
-## 🚨 Emergency Rules
+## [ALERT] Emergency Rules
 
 The system includes 18+ hard-coded emergency rules based on ACLS/PALS protocols:
 
@@ -208,7 +208,7 @@ The system includes 18+ hard-coded emergency rules based on ACLS/PALS protocols:
 
 These rules **cannot be overridden** by ML predictions.
 
-## 📈 Evaluation
+## [UP] Evaluation
 
 ```python
 from ML import ESIEvaluator, run_evaluation
@@ -221,14 +221,14 @@ evaluator = ESIEvaluator()
 metrics = evaluator.evaluate(y_true, y_pred, verbose=True)
 ```
 
-## 🔒 Safety Considerations
+##  Safety Considerations
 
 1. **Rule-based safety layer runs FIRST** - Cannot be bypassed
 2. **OOD detection escalates unusual cases** - Fail-safe
-3. **Low confidence → automatic escalation** - Err on caution
+3. **Low confidence -> automatic escalation** - Err on caution
 4. **Critical error tracking** - Monitor under-triage
 5. **Human oversight required** - Decision support only
 
-## 📝 License
+## [NOTE] License
 
 Internal use for RiskScope AI hackathon project.

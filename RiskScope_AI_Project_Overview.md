@@ -35,7 +35,7 @@
 ### Core Concept
 
 ```
-Patient enters symptoms → RiskScope assigns ESI Level 1-5 → Doctor sees highest priority first
+Patient enters symptoms -> RiskScope assigns ESI Level 1-5 -> Doctor sees highest priority first
 ```
 
 ### ESI Levels Explained
@@ -70,10 +70,10 @@ Patient enters symptoms → RiskScope assigns ESI Level 1-5 → Doctor sees high
                           ▼
 ┌─────────────────────────────────────────────────────────┐
 │  LAYER 1: EMERGENCY RULES (Hardcoded, Never Fails)      │
-│  • Chest pain + arm radiation → ESI 1                   │
-│  • SpO2 < 90% → ESI 1                                   │
-│  • Stroke symptoms (FAST) → ESI 1                       │
-│  [If triggered → Return ESI 1 immediately]              │
+│  • Chest pain + arm radiation -> ESI 1                   │
+│  • SpO2 < 90% -> ESI 1                                   │
+│  • Stroke symptoms (FAST) -> ESI 1                       │
+│  [If triggered -> Return ESI 1 immediately]              │
 └─────────────────────────┬───────────────────────────────┘
                           ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -84,7 +84,7 @@ Patient enters symptoms → RiskScope assigns ESI Level 1-5 → Doctor sees high
                           ▼
 ┌─────────────────────────────────────────────────────────┐
 │  LAYER 3: CONFIDENCE CHECK                              │
-│  • If confidence < 60% → Escalate one level             │
+│  • If confidence < 60% -> Escalate one level             │
 │  • Never under-triage when uncertain                    │
 └─────────────────────────┬───────────────────────────────┘
                           ▼
@@ -172,8 +172,8 @@ Patient enters symptoms → RiskScope assigns ESI Level 1-5 → Doctor sees high
 ## Competitive Advantages
 
 ### 1. Safety-First Architecture
-Most AI health tools: ML → Output
-RiskScope: **Rules → ML → Confidence Check → Output**
+Most AI health tools: ML -> Output
+RiskScope: **Rules -> ML -> Confidence Check -> Output**
 
 ### 2. Explainability
 Every prediction includes "Why this level?" with top factors.
@@ -207,20 +207,20 @@ We know what we can't do:
 
 ## 36-Hour Feasibility Assessment
 
-### What's Achievable ✅
+### What's Achievable [OK]
 
 | Component | Hours | Feasibility |
 |-----------|-------|-------------|
-| Project setup | 3 | ✅ Easy |
-| Data generation (Synthea) | 5 | ✅ Straightforward |
-| Model training (LightGBM) | 3 | ✅ Fast |
-| Safety layer (rules) | 4 | ✅ Deterministic |
-| Backend API (Flask) | 4 | ✅ Well-understood |
-| Frontend (React) | 10 | ✅ With simplifications |
-| Deployment | 2 | ✅ Vercel + Railway |
-| Demo prep | 4 | ✅ Critical |
+| Project setup | 3 | [OK] Easy |
+| Data generation (Synthea) | 5 | [OK] Straightforward |
+| Model training (LightGBM) | 3 | [OK] Fast |
+| Safety layer (rules) | 4 | [OK] Deterministic |
+| Backend API (Flask) | 4 | [OK] Well-understood |
+| Frontend (React) | 10 | [OK] With simplifications |
+| Deployment | 2 | [OK] Vercel + Railway |
+| Demo prep | 4 | [OK] Critical |
 
-### What's Cut ❌
+### What's Cut [X]
 
 | Feature | Time Saved | Why Cut |
 |---------|------------|---------|

@@ -1,6 +1,6 @@
 """
 RiskScope AI - ESI Triage Predictor
-Core ML model: LightGBM + Random Forest Ensemble with SHAP explainability
+Core ML model: LightGBM + XGBoost + Random Forest Ensemble with SHAP explainability
 """
 
 import numpy as np
@@ -18,14 +18,16 @@ from sklearn.metrics import (
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
+from sklearn.calibration import CalibratedClassifierCV
 import lightgbm as lgb
+import xgboost as xgb
 
 # Imbalanced learning
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 
 from config import (
-    LIGHTGBM_PARAMS, RANDOM_FOREST_PARAMS, ENSEMBLE_WEIGHTS,
+    LIGHTGBM_PARAMS, RANDOM_FOREST_PARAMS, XGBOOST_PARAMS, ENSEMBLE_WEIGHTS,
     MODEL_SAVE_PATH, TARGET_METRICS
 )
 from feature_engineering import FeatureEngineer
@@ -36,18 +38,20 @@ class ESITriagePredictor:
     Ensemble model for ESI level prediction.
     
     Architecture:
-    - LightGBM: Fast gradient boosting (60% weight)
-    - Random Forest: Interpretable ensemble (40% weight)
+    - LightGBM: Fast gradient boosting (50% weight)
+    - XGBoost: Robust boosting with native missing value handling (30% weight)
+    - Random Forest: Interpretable ensemble (20% weight)
     
     Features:
     - SMOTE for class imbalance handling
+    - Isotonic calibration for probability calibration
     - SHAP for explainability
-    - Confidence calibration
     """
     
-    def __init__(self, use_smote: bool = True):
+    def __init__(self, use_smote: bool = True, use_calibration: bool = True):
         # Initialize models
         self.lgb_model = lgb.LGBMClassifier(**LIGHTGBM_PARAMS)
+        self.xgb_model = xgb.XGBClassifier(**XGBOOST_PARAMS)
         self.rf_model = RandomForestClassifier(**RANDOM_FOREST_PARAMS)
         
         # Ensemble weights
@@ -60,6 +64,10 @@ class ESITriagePredictor:
         # SMOTE for imbalance
         self.use_smote = use_smote
         self.smote = SMOTE(random_state=42, k_neighbors=3)
+        
+        # Isotonic calibration flag
+        self.use_calibration = use_calibration
+        self.calibrated_models = {}
         
         # SHAP explainer (initialized after fit)
         self.shap_explainer = None
@@ -116,7 +124,7 @@ class ESITriagePredictor:
             try:
                 X_resampled, y_resampled = self.smote.fit_resample(X, y)
                 if verbose:
-                    print(f"  Resampled: {X.shape[0]} → {X_resampled.shape[0]} samples")
+                    print(f"  Resampled: {X.shape[0]} -> {X_resampled.shape[0]} samples")
             except Exception as e:
                 if verbose:
                     print(f"  SMOTE failed: {e}. Using original data.")
@@ -131,13 +139,24 @@ class ESITriagePredictor:
         
         # Train LightGBM
         if verbose:
-            print("\nTraining LightGBM...")
+            print("\nTraining LightGBM (50% weight)...")
         self.lgb_model.fit(X_scaled, y_resampled)
+        
+        # Train XGBoost
+        if verbose:
+            print("Training XGBoost (30% weight)...")
+        self.xgb_model.fit(X_scaled, y_resampled)
         
         # Train Random Forest
         if verbose:
-            print("Training Random Forest...")
+            print("Training Random Forest (20% weight)...")
         self.rf_model.fit(X_scaled, y_resampled)
+        
+        # Apply Isotonic Calibration if enabled
+        if self.use_calibration:
+            if verbose:
+                print("\nApplying Isotonic calibration...")
+            self._apply_calibration(X_scaled, y_resampled)
         
         self.is_fitted = True
         
@@ -154,10 +173,62 @@ class ESITriagePredictor:
         
         if verbose:
             print("\n" + "=" * 60)
-            print("Training complete!")
+            print("Training complete! (3-model ensemble with calibration)")
             print("=" * 60)
         
         return self
+    
+    def _apply_calibration(self, X: np.ndarray, y: np.ndarray):
+        """Apply Isotonic calibration to improve probability estimates."""
+        from sklearn.model_selection import train_test_split
+        import sklearn
+        
+        # Use a small holdout for calibration
+        X_train, X_cal, y_train, y_cal = train_test_split(
+            X, y, test_size=0.15, stratify=y, random_state=42
+        )
+        
+        # Check sklearn version for cv parameter compatibility
+        sklearn_version = tuple(int(x) for x in sklearn.__version__.split('.')[:2])
+        
+        # Calibrate each model
+        try:
+            # For sklearn >= 1.5, use cv=None with pre-fitted estimators
+            if sklearn_version >= (1, 5):
+                # Fit calibrators directly on calibration set
+                self.calibrated_models['lightgbm'] = CalibratedClassifierCV(
+                    estimator=self.lgb_model, cv=None, method='isotonic'
+                )
+                self.calibrated_models['lightgbm'].fit(X_cal, y_cal)
+                
+                self.calibrated_models['xgboost'] = CalibratedClassifierCV(
+                    estimator=self.xgb_model, cv=None, method='isotonic'
+                )
+                self.calibrated_models['xgboost'].fit(X_cal, y_cal)
+                
+                self.calibrated_models['random_forest'] = CalibratedClassifierCV(
+                    estimator=self.rf_model, cv=None, method='isotonic'
+                )
+                self.calibrated_models['random_forest'].fit(X_cal, y_cal)
+            else:
+                # Legacy sklearn: use cv='prefit'
+                self.calibrated_models['lightgbm'] = CalibratedClassifierCV(
+                    self.lgb_model, cv='prefit', method='isotonic'
+                )
+                self.calibrated_models['lightgbm'].fit(X_cal, y_cal)
+                
+                self.calibrated_models['xgboost'] = CalibratedClassifierCV(
+                    self.xgb_model, cv='prefit', method='isotonic'
+                )
+                self.calibrated_models['xgboost'].fit(X_cal, y_cal)
+                
+                self.calibrated_models['random_forest'] = CalibratedClassifierCV(
+                    self.rf_model, cv='prefit', method='isotonic'
+                )
+                self.calibrated_models['random_forest'].fit(X_cal, y_cal)
+        except Exception as e:
+            print(f"  Calibration warning: {e}")
+            self.calibrated_models = {}
     
     def predict(self, X: Union[pd.DataFrame, np.ndarray, Dict]) -> np.ndarray:
         """
@@ -209,15 +280,44 @@ class ESITriagePredictor:
         if not already_scaled:
             X = self.scaler.transform(X)
         
-        # Get probabilities from both models
-        lgb_proba = self.lgb_model.predict_proba(X)
-        rf_proba = self.rf_model.predict_proba(X)
+        # Check if XGBoost is fitted
+        xgb_fitted = hasattr(self.xgb_model, 'get_booster') and self.xgb_model.get_booster is not None
+        try:
+            # This will raise NotFittedError if not fitted
+            if xgb_fitted:
+                _ = self.xgb_model.get_booster()
+        except:
+            xgb_fitted = False
         
-        # Weighted ensemble
-        ensemble_proba = (
-            self.weights['lightgbm'] * lgb_proba +
-            self.weights['random_forest'] * rf_proba
-        )
+        # Get probabilities from models (use calibrated if available)
+        if self.calibrated_models and 'lightgbm' in self.calibrated_models:
+            lgb_proba = self.calibrated_models['lightgbm'].predict_proba(X)
+            rf_proba = self.calibrated_models['random_forest'].predict_proba(X)
+            if xgb_fitted and 'xgboost' in self.calibrated_models:
+                xgb_proba = self.calibrated_models['xgboost'].predict_proba(X)
+            else:
+                xgb_proba = None
+        else:
+            lgb_proba = self.lgb_model.predict_proba(X)
+            rf_proba = self.rf_model.predict_proba(X)
+            if xgb_fitted:
+                xgb_proba = self.xgb_model.predict_proba(X)
+            else:
+                xgb_proba = None
+        
+        # Weighted ensemble - adjust weights if XGBoost not available
+        if xgb_proba is not None:
+            # Full 3-model ensemble (50% LGB + 30% XGB + 20% RF)
+            ensemble_proba = (
+                self.weights['lightgbm'] * lgb_proba +
+                self.weights.get('xgboost', 0.3) * xgb_proba +
+                self.weights['random_forest'] * rf_proba
+            )
+        else:
+            # Fallback 2-model ensemble (65% LGB + 35% RF)
+            lgb_weight = self.weights['lightgbm'] / (self.weights['lightgbm'] + self.weights['random_forest'])
+            rf_weight = self.weights['random_forest'] / (self.weights['lightgbm'] + self.weights['random_forest'])
+            ensemble_proba = lgb_weight * lgb_proba + rf_weight * rf_proba
         
         return ensemble_proba
     
@@ -358,14 +458,14 @@ class ESITriagePredictor:
             
             # Check against targets
             if self.training_metrics['cohens_kappa_mean'] >= TARGET_METRICS['cohens_kappa']:
-                print(f"  ✅ Kappa target met (>= {TARGET_METRICS['cohens_kappa']})")
+                print(f"  [OK] Kappa target met (>= {TARGET_METRICS['cohens_kappa']})")
             else:
-                print(f"  ⚠️  Kappa below target ({TARGET_METRICS['cohens_kappa']})")
+                print(f"  [!]  Kappa below target ({TARGET_METRICS['cohens_kappa']})")
             
             if self.training_metrics['esi_12_sensitivity_mean'] >= TARGET_METRICS['esi_12_sensitivity']:
-                print(f"  ✅ ESI 1-2 sensitivity target met (>= {TARGET_METRICS['esi_12_sensitivity']:.0%})")
+                print(f"  [OK] ESI 1-2 sensitivity target met (>= {TARGET_METRICS['esi_12_sensitivity']:.0%})")
             else:
-                print(f"  ⚠️  ESI 1-2 sensitivity below target ({TARGET_METRICS['esi_12_sensitivity']:.0%})")
+                print(f"  [!]  ESI 1-2 sensitivity below target ({TARGET_METRICS['esi_12_sensitivity']:.0%})")
     
     def _init_shap_explainer(self, X_sample: np.ndarray):
         """Initialize SHAP TreeExplainer."""
@@ -457,13 +557,16 @@ class ESITriagePredictor:
         
         joblib.dump({
             'lgb_model': self.lgb_model,
+            'xgb_model': self.xgb_model,
             'rf_model': self.rf_model,
+            'calibrated_models': self.calibrated_models,
             'scaler': self.scaler,
             'feature_engineer': self.feature_engineer,
             'feature_names': self.feature_names,
             'weights': self.weights,
             'training_metrics': self.training_metrics,
-            'is_fitted': self.is_fitted
+            'is_fitted': self.is_fitted,
+            'use_calibration': self.use_calibration
         }, path)
         print(f"Model saved to {path}")
     
@@ -475,21 +578,34 @@ class ESITriagePredictor:
         
         data = joblib.load(path)
         
-        predictor = cls(use_smote=False)
+        predictor = cls(use_smote=False, use_calibration=False)
         predictor.lgb_model = data['lgb_model']
+        predictor.xgb_model = data.get('xgb_model', None)
         predictor.rf_model = data['rf_model']
+        predictor.calibrated_models = data.get('calibrated_models', {})
         predictor.scaler = data['scaler']
         predictor.feature_engineer = data['feature_engineer']
         predictor.feature_names = data['feature_names']
         predictor.weights = data['weights']
         predictor.training_metrics = data['training_metrics']
         predictor.is_fitted = data['is_fitted']
+        predictor.use_calibration = data.get('use_calibration', False)
+        
+        # Handle old models without XGBoost
+        if predictor.xgb_model is None:
+            predictor.xgb_model = xgb.XGBClassifier(**XGBOOST_PARAMS)
+            # Adjust weights for 2-model ensemble
+            if 'xgboost' in predictor.weights:
+                total = predictor.weights['lightgbm'] + predictor.weights['random_forest']
+                predictor.weights['lightgbm'] /= total
+                predictor.weights['random_forest'] /= total
+                predictor.weights['xgboost'] = 0.0
         
         print(f"Model loaded from {path}")
         return predictor
     
     def get_feature_importance(self, top_n: int = 20) -> pd.DataFrame:
-        """Get feature importance from both models."""
+        """Get feature importance from all 3 models."""
         lgb_imp = self.lgb_model.feature_importances_
         rf_imp = self.rf_model.feature_importances_
         
@@ -497,14 +613,26 @@ class ESITriagePredictor:
         lgb_imp = lgb_imp / lgb_imp.max()
         rf_imp = rf_imp / rf_imp.max()
         
+        # Get XGBoost importance if available
+        if hasattr(self.xgb_model, 'feature_importances_'):
+            xgb_imp = self.xgb_model.feature_importances_
+            xgb_imp = xgb_imp / (xgb_imp.max() + 1e-10)
+        else:
+            xgb_imp = np.zeros_like(lgb_imp)
+        
         # Weighted average
-        combined = self.weights['lightgbm'] * lgb_imp + self.weights['random_forest'] * rf_imp
+        combined = (
+            self.weights['lightgbm'] * lgb_imp + 
+            self.weights.get('xgboost', 0) * xgb_imp +
+            self.weights['random_forest'] * rf_imp
+        )
         
         # Create DataFrame
         df = pd.DataFrame({
             'feature': self.feature_names if self.feature_names else [f'f_{i}' for i in range(len(combined))],
             'importance': combined,
             'lgb_importance': lgb_imp,
+            'xgb_importance': xgb_imp,
             'rf_importance': rf_imp
         })
         

@@ -186,12 +186,12 @@ def test_inference(predictor, sample_cases: list = None):
         name = case.pop('name', 'Unknown')
         expected = case.pop('expected_esi', None)
         
-        print(f"\n📋 Case: {name}")
+        print(f"\n[CASE] {name}")
         
         # Check emergency rules first
         emergency_result = safety_engine.check(case)
         if emergency_result.triggered:
-            print(f"  🚨 EMERGENCY RULE TRIGGERED: {emergency_result.rule_name}")
+            print(f"  [EMERGENCY] {emergency_result.rule_name}")
             print(f"  ESI Level: {emergency_result.esi_level} (Rule-Based)")
             print(f"  Protocol: {emergency_result.protocol}")
             predicted = emergency_result.esi_level
@@ -214,7 +214,7 @@ def test_inference(predictor, sample_cases: list = None):
             print(f"  Confidence: {confidence:.1%}")
         
         if expected:
-            match = "✅" if predicted == expected else "⚠️"
+            match = "[OK]" if predicted == expected else "[MISMATCH]"
             print(f"  Expected: {expected} {match}")
         
         # Restore for next iteration
@@ -250,7 +250,6 @@ def main():
         X, y = generate_synthetic_dataset(n_samples=args.samples)
 
         # Save training CSV for later integrity checks
-        import os
         os.makedirs('data', exist_ok=True)
         df_save = X.copy()
         df_save['esi_level'] = y
@@ -284,8 +283,8 @@ def main():
     sens_met = metrics.get('esi_12_sensitivity', 0) >= TARGET_METRICS['esi_12_sensitivity']
     
     print(f"\nTarget Metrics:")
-    print(f"  Kappa >= {TARGET_METRICS['cohens_kappa']}: {'✅ MET' if kappa_met else '❌ NOT MET'}")
-    print(f"  Sensitivity >= {TARGET_METRICS['esi_12_sensitivity']:.0%}: {'✅ MET' if sens_met else '❌ NOT MET'}")
+    print(f"  Kappa >= {TARGET_METRICS['cohens_kappa']}: {'[OK] MET' if kappa_met else '[X] NOT MET'}")
+    print(f"  Sensitivity >= {TARGET_METRICS['esi_12_sensitivity']:.0%}: {'[OK] MET' if sens_met else '[X] NOT MET'}")
 
 
 if __name__ == '__main__':

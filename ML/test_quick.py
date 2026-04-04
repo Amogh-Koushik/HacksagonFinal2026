@@ -15,29 +15,29 @@ def test_imports():
     print("Testing imports...")
     try:
         from config import LIGHTGBM_PARAMS, ESI_LEVELS
-        print("  ✅ config.py")
+        print("  [OK] config.py")
         
         from feature_engineering import FeatureEngineer, engineer_features
-        print("  ✅ feature_engineering.py")
+        print("  [OK] feature_engineering.py")
         
         from safety_engine import EmergencyRuleEngine, ClinicalSafetyEngine
-        print("  ✅ safety_engine.py")
+        print("  [OK] safety_engine.py")
         
         from ood_detector import OutOfDistributionDetector
-        print("  ✅ ood_detector.py")
+        print("  [OK] ood_detector.py")
         
         from esi_predictor import ESITriagePredictor
-        print("  ✅ esi_predictor.py")
+        print("  [OK] esi_predictor.py")
         
         from generate_synthetic_data import generate_synthetic_dataset
-        print("  ✅ generate_synthetic_data.py")
+        print("  [OK] generate_synthetic_data.py")
         
         from evaluate import ESIEvaluator
-        print("  ✅ evaluate.py")
+        print("  [OK] evaluate.py")
         
         return True
     except ImportError as e:
-        print(f"  ❌ Import error: {e}")
+        print(f"  [X] Import error: {e}")
         return False
 
 
@@ -70,10 +70,10 @@ def test_feature_engineering():
     print(f"  Feature names: {len(fe.get_feature_names())}")
     
     if features.shape[1] > 50:
-        print("  ✅ Feature engineering working")
+        print("  [OK] Feature engineering working")
         return True
     else:
-        print("  ❌ Feature count too low")
+        print("  [X] Feature count too low")
         return False
 
 
@@ -127,10 +127,10 @@ def test_emergency_rules():
         esi_match = (not result.triggered) or (result.esi_level == case['expected_esi'])
         
         if triggered_match and esi_match:
-            print(f"  ✅ {case['name']}: {'Triggered' if result.triggered else 'Not triggered'}")
+            print(f"  [OK] {case['name']}: {'Triggered' if result.triggered else 'Not triggered'}")
             passed += 1
         else:
-            print(f"  ❌ {case['name']}: Expected triggered={case['expected_triggered']}, "
+            print(f"  [X] {case['name']}: Expected triggered={case['expected_triggered']}, "
                   f"got triggered={result.triggered}")
     
     print(f"  Passed: {passed}/{len(test_cases)}")
@@ -154,10 +154,10 @@ def test_synthetic_data():
         print(f"    ESI {i}: {count} ({count/len(y)*100:.1f}%)")
     
     if len(X) == 1000 and X.shape[1] > 20:
-        print("  ✅ Synthetic data generation working")
+        print("  [OK] Synthetic data generation working")
         return True
     else:
-        print("  ❌ Synthetic data generation failed")
+        print("  [X] Synthetic data generation failed")
         return False
 
 
@@ -184,11 +184,11 @@ def test_model_training():
         
         print(f"  Prediction: ESI {pred[0]}")
         print(f"  Confidence: {proba[0].max():.1%}")
-        print("  ✅ Model training working")
+        print("  [OK] Model training working")
         return True
         
     except Exception as e:
-        print(f"  ❌ Training failed: {e}")
+        print(f"  [X] Training failed: {e}")
         return False
 
 
@@ -232,10 +232,10 @@ def test_full_pipeline():
     print(f"  Action: {result['action'][:50]}...")
     
     if result['esi_level'] in [1, 2, 3, 4, 5]:
-        print("  ✅ Full pipeline working")
+        print("  [OK] Full pipeline working")
         return True
     else:
-        print("  ❌ Invalid ESI level")
+        print("  [X] Invalid ESI level")
         return False
 
 
@@ -260,7 +260,7 @@ def run_all_tests():
             result = test_fn()
             results.append((name, result))
         except Exception as e:
-            print(f"  ❌ {name} failed with exception: {e}")
+            print(f"  [X] {name} failed with exception: {e}")
             results.append((name, False))
     
     # Summary
@@ -272,15 +272,15 @@ def run_all_tests():
     total = len(results)
     
     for name, result in results:
-        icon = "✅" if result else "❌"
+        icon = "[OK]" if result else "[X]"
         print(f"  {icon} {name}")
     
     print(f"\nTotal: {passed}/{total} tests passed")
     
     if passed == total:
-        print("\n🎉 All tests passed! Ready for full training.")
+        print("\n[DONE] All tests passed! Ready for full training.")
     else:
-        print("\n⚠️  Some tests failed. Please fix issues before training.")
+        print("\n[!]  Some tests failed. Please fix issues before training.")
     
     return passed == total
 

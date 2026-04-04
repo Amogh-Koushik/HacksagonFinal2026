@@ -200,10 +200,10 @@ def run_tests():
         result = engine.check(tc["patient"])
 
         if result.triggered and result.esi_level == 1:
-            print(f"  ✅ {tc['name']:40s} → Rule: {result.rule_name}")
+            print(f"  [PASS] {tc['name']:40s} -> Rule: {result.rule_name}")
             passed += 1
         else:
-            print(f"  ❌ {tc['name']:40s} → Expected rule '{tc['rule']}' "
+            print(f"  [FAIL] {tc['name']:40s} -> Expected rule '{tc['rule']}' "
                   f"but got: triggered={result.triggered}, "
                   f"rule={result.rule_name}, esi={result.esi_level}")
             failed += 1
@@ -217,10 +217,10 @@ def run_tests():
         result = engine.check(tc["patient"])
 
         if result.triggered and result.esi_level == 2:
-            print(f"  ✅ {tc['name']:40s} → Rule: {result.rule_name}")
+            print(f"  [PASS] {tc['name']:40s} -> Rule: {result.rule_name}")
             passed += 1
         else:
-            print(f"  ❌ {tc['name']:40s} → Expected ESI 2 but got: "
+            print(f"  [FAIL] {tc['name']:40s} -> Expected ESI 2 but got: "
                   f"triggered={result.triggered}, esi={result.esi_level}")
             failed += 1
 
@@ -233,10 +233,10 @@ def run_tests():
         result = engine.check(tc["patient"])
 
         if not result.triggered:
-            print(f"  ✅ {tc['name']:40s} → No rule triggered (correct)")
+            print(f"  [PASS] {tc['name']:40s} -> No rule triggered (correct)")
             passed += 1
         else:
-            print(f"  ❌ {tc['name']:40s} → Unexpected trigger: {result.rule_name}")
+            print(f"  [FAIL] {tc['name']:40s} -> Unexpected trigger: {result.rule_name}")
             failed += 1
 
     # ----- TEST 4: Confidence Calibrator -----
@@ -250,11 +250,11 @@ def run_tests():
     high_conf_proba = np.array([0.01, 0.01, 0.02, 0.01, 0.95])
     result = calibrator.calibrate(high_conf_proba)
     if not result['should_escalate'] and result['confidence'] > 0.7:
-        print(f"  ✅ High confidence:  conf={result['confidence']:.2f}, "
+        print(f"  [PASS] High confidence:  conf={result['confidence']:.2f}, "
               f"escalate={result['should_escalate']}")
         passed += 1
     else:
-        print(f"  ❌ High confidence failed: {result}")
+        print(f"  [FAIL] High confidence failed: {result}")
         failed += 1
 
     # Low confidence case
@@ -262,11 +262,11 @@ def run_tests():
     low_conf_proba = np.array([0.15, 0.25, 0.25, 0.20, 0.15])
     result = calibrator.calibrate(low_conf_proba)
     if result['should_escalate'] and result['confidence'] < 0.6:
-        print(f"  ✅ Low confidence:   conf={result['confidence']:.2f}, "
+        print(f"  [PASS] Low confidence:   conf={result['confidence']:.2f}, "
               f"escalate={result['should_escalate']}")
         passed += 1
     else:
-        print(f"  ❌ Low confidence failed: {result}")
+        print(f"  [FAIL] Low confidence failed: {result}")
         failed += 1
 
     # Ambiguous case
@@ -274,21 +274,21 @@ def run_tests():
     ambig_proba = np.array([0.02, 0.40, 0.42, 0.10, 0.06])
     result = calibrator.calibrate(ambig_proba)
     if result['is_ambiguous']:
-        print(f"  ✅ Ambiguous:        conf={result['confidence']:.2f}, "
+        print(f"  [PASS] Ambiguous:        conf={result['confidence']:.2f}, "
               f"ambiguous={result['is_ambiguous']}")
         passed += 1
     else:
-        print(f"  ❌ Ambiguous failed: {result}")
+        print(f"  [FAIL] Ambiguous failed: {result}")
         failed += 1
 
     # Escalation logic
     total += 1
     esi, reason = calibrator.escalate_prediction(3, result)
     if esi == 2:
-        print(f"  ✅ Escalation:       ESI 3 → ESI {esi}")
+        print(f"  [PASS] Escalation:       ESI 3 -> ESI {esi}")
         passed += 1
     else:
-        print(f"  ❌ Escalation failed: expected 2, got {esi}")
+        print(f"  [FAIL] Escalation failed: expected 2, got {esi}")
         failed += 1
 
     # ----- TEST 5: Full triage pipeline -----
@@ -302,7 +302,7 @@ def run_tests():
     if os.path.exists(ensemble_path) and os.path.exists(ood_path):
         try:
             safety_engine = ClinicalSafetyEngine.from_trained_models(model_dir)
-            print("  ✅ Factory method loaded successfully")
+            print("  [PASS] Factory method loaded successfully")
             passed += 1
             total += 1
 
@@ -313,11 +313,11 @@ def run_tests():
                 "heart_rate": 130, "bp_systolic": 85, "spo2": 88,
             })
             if mi_result['method'] == 'RULE_BASED' and mi_result['esi_level'] == 1:
-                print(f"  ✅ Emergency path:   ESI {mi_result['esi_level']} "
+                print(f"  [PASS] Emergency path:   ESI {mi_result['esi_level']} "
                       f"({mi_result['method']})")
                 passed += 1
             else:
-                print(f"  ❌ Emergency path failed: {mi_result}")
+                print(f"  [FAIL] Emergency path failed: {mi_result}")
                 failed += 1
 
             # Test ML prediction path
@@ -328,11 +328,11 @@ def run_tests():
                 "respiratory_rate": 15, "headache": True,
             })
             if mild_result['method'] == 'ML_PREDICTION':
-                print(f"  ✅ ML path:          ESI {mild_result['esi_level']} "
+                print(f"  [PASS] ML path:          ESI {mild_result['esi_level']} "
                       f"(conf={mild_result['confidence']:.2f})")
                 passed += 1
             else:
-                print(f"  ❌ ML path failed: {mild_result}")
+                print(f"  [FAIL] ML path failed: {mild_result}")
                 failed += 1
 
             # Verify explanation is present
@@ -340,32 +340,32 @@ def run_tests():
             if mild_result.get('explanation') and len(mild_result['explanation']) > 0:
                 first_exp = mild_result['explanation'][0]
                 has_display = 'display_name' in first_exp or 'feature' in first_exp
-                print(f"  ✅ Explanation:      {len(mild_result['explanation'])} features "
+                print(f"  [PASS] Explanation:      {len(mild_result['explanation'])} features "
                       f"(has display names: {has_display})")
                 passed += 1
             else:
-                print(f"  ❌ Missing explanation in triage result")
+                print(f"  [FAIL] Missing explanation in triage result")
                 failed += 1
 
             # Verify confidence details
             total += 1
             if mild_result.get('confidence_details'):
                 cd = mild_result['confidence_details']
-                print(f"  ✅ Confidence:       level={cd.get('level')}, "
+                print(f"  [PASS] Confidence:       level={cd.get('level')}, "
                       f"label={cd.get('label', '')[:40]}")
                 passed += 1
             else:
-                print(f"  ❌ Missing confidence_details")
+                print(f"  [FAIL] Missing confidence_details")
                 failed += 1
 
         except Exception as e:
-            print(f"  ❌ Factory method failed: {e}")
+            print(f"  [FAIL] Factory method failed: {e}")
             import traceback
             traceback.print_exc()
             failed += 1
             total += 1
     else:
-        print("  ⚠️  Skipping (model files not found)")
+        print("  [WARN]  Skipping (model files not found)")
 
     # ----- SUMMARY -----
     print("\n" + "=" * 64)
@@ -375,9 +375,9 @@ def run_tests():
     print(f"  Failed: {failed}/{total}")
 
     if failed == 0:
-        print("\n  ✅ ALL SAFETY TESTS PASSED")
+        print("\n  [PASS] ALL SAFETY TESTS PASSED")
     else:
-        print(f"\n  ❌ {failed} TEST(S) FAILED — needs attention")
+        print(f"\n  [FAIL] {failed} TEST(S) FAILED — needs attention")
 
     print("=" * 64)
 

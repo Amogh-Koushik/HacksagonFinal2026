@@ -65,12 +65,12 @@ def add_measurement_noise(df: pd.DataFrame,
 
     # Each vital gets its own clinically-appropriate noise level
     vital_noise_config = {
-        'heart_rate':       {'noise': noise_level, 'round': True},    # +/-5% → ~4 bpm at HR=80
-        'bp_systolic':      {'noise': noise_level, 'round': True},    # +/-5% → ~6 mmHg at SBP=120
-        'bp_diastolic':     {'noise': noise_level, 'round': True},    # +/-5% → ~4 mmHg at DBP=80
+        'heart_rate':       {'noise': noise_level, 'round': True},    # +/-5% -> ~4 bpm at HR=80
+        'bp_systolic':      {'noise': noise_level, 'round': True},    # +/-5% -> ~6 mmHg at SBP=120
+        'bp_diastolic':     {'noise': noise_level, 'round': True},    # +/-5% -> ~4 mmHg at DBP=80
         'spo2':             {'noise': 0.02, 'round': True},           # +/-2% (more sensitive instrument)
         'temperature':      {'noise': 0.008, 'round': False},         # +/-0.3 deg at 37.0
-        'respiratory_rate': {'noise': noise_level, 'round': True},    # +/-5% → ~1 breath at RR=16
+        'respiratory_rate': {'noise': noise_level, 'round': True},    # +/-5% -> ~1 breath at RR=16
     }
 
     noised_count = 0
@@ -220,8 +220,8 @@ def add_boundary_patients(df: pd.DataFrame,
     Generate patients whose vitals sit on the border between two ESI levels.
 
     These are the hardest cases for nurses AND for ML:
-      - Patient with HR=100, SBP=140, SpO2=95, mild chest pain → ESI 2 or 3?
-      - Patient with headache, normal vitals, but age 70 → ESI 3 or 4?
+      - Patient with HR=100, SBP=140, SpO2=95, mild chest pain -> ESI 2 or 3?
+      - Patient with headache, normal vitals, but age 70 -> ESI 3 or 4?
 
     We create these by:
       1. Taking pairs of adjacent-ESI patients
@@ -335,7 +335,7 @@ def generate_realistic_dataset(
     random_state: int = 42
 ) -> pd.DataFrame:
     """
-    Full pipeline: base generation → noise → missing → label noise → boundary → save.
+    Full pipeline: base generation -> noise -> missing -> label noise -> boundary -> save.
     """
 
     np.random.seed(random_state)

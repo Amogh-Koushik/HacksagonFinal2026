@@ -53,11 +53,29 @@ RANDOM_FOREST_PARAMS = {
     'n_jobs': -1,
 }
 
-# Ensemble weights (LightGBM 65%, Random Forest 35%)
-# LGB gets more weight as it benefits most from the larger dataset
+# XGBoost parameters - handles missing values natively
+XGBOOST_PARAMS = {
+    'objective': 'multi:softprob',
+    'num_class': 5,
+    'max_depth': 8,
+    'learning_rate': 0.05,
+    'n_estimators': 300,
+    'min_child_weight': 3,
+    'subsample': 0.8,
+    'colsample_bytree': 0.8,
+    'reg_alpha': 0.1,
+    'reg_lambda': 0.1,
+    'random_state': 42,
+    'eval_metric': 'mlogloss',
+    'use_label_encoder': False,
+}
+
+# Ensemble weights (LightGBM 50%, XGBoost 30%, Random Forest 20%)
+# Three diverse models = better calibrated probabilities
 ENSEMBLE_WEIGHTS = {
-    'lightgbm': 0.65,
-    'random_forest': 0.35
+    'lightgbm': 0.50,
+    'xgboost': 0.30,
+    'random_forest': 0.20
 }
 
 # =============================================================================

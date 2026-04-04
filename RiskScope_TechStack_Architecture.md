@@ -9,11 +9,11 @@
 
 
 ═══════════════════════════════════════════════════════════════════════════════
-                         🖥️ APPLICATION LAYER (Brief)
+                         [DISPLAY] APPLICATION LAYER (Brief)
 ═══════════════════════════════════════════════════════════════════════════════
 
     ┌─────────────────┐                         ┌─────────────────┐
-    │    FRONTEND     │  ←───── HTTPS ─────→    │    BACKEND      │
+    │    FRONTEND     │  ←───── HTTPS ─────->    │    BACKEND      │
     │                 │                         │                 │
     │  React + Vite   │                         │  Flask + Python │
     │  Vanilla CSS    │                         │  REST API       │
@@ -24,7 +24,7 @@
                                  │
                                  ▼
 ═══════════════════════════════════════════════════════════════════════════════
-                    🧠 MACHINE LEARNING PIPELINE (Core Focus)
+                    [BRAIN] MACHINE LEARNING PIPELINE (Core Focus)
 ═══════════════════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -131,8 +131,8 @@
 │      │   ┌─────────────────────────────────────────────────────┐   │        │
 │      │   │  5-FOLD CROSS-VALIDATION (Patient-Level Splits)     │   │        │
 │      │   │                                                      │   │        │
-│      │   │  Fold 1: Train on 80% → Test on 20%                 │   │        │
-│      │   │  Fold 2: Train on 80% → Test on 20%                 │   │        │
+│      │   │  Fold 1: Train on 80% -> Test on 20%                 │   │        │
+│      │   │  Fold 2: Train on 80% -> Test on 20%                 │   │        │
 │      │   │  ...                                                 │   │        │
 │      │   │  Average across folds                                │   │        │
 │      │   └─────────────────────────────────────────────────────┘   │        │
@@ -211,10 +211,10 @@
 │      │                                                              │        │
 │      │   Hard-coded clinical rules (ACLS/ESI protocol):            │        │
 │      │                                                              │        │
-│      │   IF chest_pain AND arm_radiation    → ESI 1 (MI)           │        │
-│      │   IF SpO2 < 90%                      → ESI 1 (Resp Failure) │        │
-│      │   IF facial_droop AND arm_weakness   → ESI 1 (Stroke)       │        │
-│      │   IF BP_systolic < 90 AND HR > 100   → ESI 1 (Shock)        │        │
+│      │   IF chest_pain AND arm_radiation    -> ESI 1 (MI)           │        │
+│      │   IF SpO2 < 90%                      -> ESI 1 (Resp Failure) │        │
+│      │   IF facial_droop AND arm_weakness   -> ESI 1 (Stroke)       │        │
+│      │   IF BP_systolic < 90 AND HR > 100   -> ESI 1 (Shock)        │        │
 │      │                                                              │        │
 │      │   These rules CANNOT be overridden by ML                     │        │
 │      │   Deterministic, auditable, fail-safe                        │        │
@@ -225,7 +225,7 @@
 │      │          CONFIDENCE CALIBRATION (Post-ML)                    │        │
 │      │                                                              │        │
 │      │   IF ml_confidence < 60%:                                    │        │
-│      │       escalate_one_level()  # ESI 3 → ESI 2                 │        │
+│      │       escalate_one_level()  # ESI 3 -> ESI 2                 │        │
 │      │       flag_for_review = True                                │        │
 │      │                                                              │        │
 │      │   Principle: When uncertain, be MORE cautious               │        │
@@ -236,11 +236,11 @@
 
 
 ═══════════════════════════════════════════════════════════════════════════════
-                         🚀 DEPLOYMENT & SERVING
+                         [LAUNCH] DEPLOYMENT & SERVING
 ═══════════════════════════════════════════════════════════════════════════════
 
     ┌─────────────────┐           ┌─────────────────┐
-    │  MODEL SAVING   │    ──→    │  MODEL LOADING  │
+    │  MODEL SAVING   │    ──->    │  MODEL LOADING  │
     │                 │           │                 │
     │  joblib.dump()  │           │  joblib.load()  │
     │  model.pkl      │           │  Flask API      │
@@ -248,7 +248,7 @@
     └─────────────────┘           └─────────────────┘
              │                             │
              │    ┌─────────────────┐      │
-             └──→ │    GITHUB       │ ←────┘
+             └──-> │    GITHUB       │ ←────┘
                   │  Version Control│
                   └────────┬────────┘
                            │
@@ -258,12 +258,12 @@
     │    VERCEL       │       │    RAILWAY      │
     │   (Frontend)    │       │   (Backend+ML)  │
     │                 │       │                 │
-    │  React App      │  ←→   │  Flask + Model  │
+    │  React App      │  ←->   │  Flask + Model  │
     └─────────────────┘       └─────────────────┘
 
 
 ═══════════════════════════════════════════════════════════════════════════════
-                         📋 ML/DS TECH STACK SUMMARY
+                         [DOC] ML/DS TECH STACK SUMMARY
 ═══════════════════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -299,7 +299,7 @@
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           ML PIPELINE FLOW                                   │
 │                                                                              │
-│  Synthea → Pandas → Feature Eng → Preprocessing → LightGBM+RF → SHAP → API  │
+│  Synthea -> Pandas -> Feature Eng -> Preprocessing -> LightGBM+RF -> SHAP -> API  │
 │                                                                              │
 │  Inference Time: < 100ms per patient                                         │
 │  Total Triage: < 30 seconds (including user input)                          │

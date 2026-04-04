@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
 
-# Training schema: 30 columns expected by the trained model
+# Training schema: 32 columns expected by the trained model
 TRAINING_FEATURE_COLUMNS = [
     'age', 'gender',
     'heart_rate', 'bp_systolic', 'bp_diastolic', 'spo2', 'temperature', 'respiratory_rate',
@@ -18,6 +18,7 @@ TRAINING_FEATURE_COLUMNS = [
     'rigid_abdomen', 'altered_mental_status', 'confusion', 'fever', 'nausea',
     'vomiting', 'dizziness', 'syncope', 'headache', 'seizure',
     'uncontrolled_bleeding', 'severe_pain',
+    'cough', 'fatigue',
     'symptom_duration_hours'
 ]
 
@@ -569,7 +570,8 @@ class ClinicalSafetyEngine:
                     'original_level': original_level,
                     'action': self._get_recommendation(esi_level) + ' (ESCALATED - LOW CONFIDENCE)',
                     'protocol': self._get_protocol(esi_level),
-                    'explanation': self._get_explanation(features, prediction)
+                    'explanation': self._get_explanation(features, prediction),
+                    'confidence_details': self._get_confidence_details(confidence)
                 }
             
             return {
@@ -578,7 +580,8 @@ class ClinicalSafetyEngine:
                 'method': 'ML_PREDICTION',
                 'action': self._get_recommendation(esi_level),
                 'protocol': self._get_protocol(esi_level),
-                'explanation': self._get_explanation(features, prediction)
+                'explanation': self._get_explanation(features, prediction),
+                'confidence_details': self._get_confidence_details(confidence)
             }
         
         # No ML model - return conservative estimate
@@ -588,7 +591,8 @@ class ClinicalSafetyEngine:
             'method': 'DEFAULT_FALLBACK',
             'action': 'Doctor evaluation recommended',
             'protocol': 'Standard triage assessment',
-            'explanation': [{'feature': 'no_ml_model', 'impact': '?', 'value': 'N/A'}]
+            'explanation': [{'feature': 'no_ml_model', 'impact': '?', 'value': 'N/A'}],
+            'confidence_details': self._get_confidence_details(0.5)
         }
     
     def _get_recommendation(self, esi_level: int) -> str:
@@ -613,10 +617,238 @@ class ClinicalSafetyEngine:
         }
         return protocols.get(esi_level, "ESI Assessment")
     
-    def _get_explanation(self, features, prediction) -> List[Dict]:
-        """Get feature explanation for prediction."""
-        # Placeholder - actual SHAP integration in esi_predictor.py
-        return [{'feature': 'ml_prediction', 'impact': '+', 'value': 'See SHAP analysis'}]
+    def _get_confidence_details(self, confidence: float) -> Dict[str, Any]:
+        """Get confidence level details."""
+        if confidence >= 0.8:
+            level = 'high'
+            label = 'High confidence prediction'
+        elif confidence >= 0.6:
+            level = 'medium'
+            label = 'Moderate confidence - consider clinical review'
+        else:
+            level = 'low'
+            label = 'Low confidence - clinical judgment recommended'
+        
+        return {
+            'level': level,
+            'label': label,
+            'score': confidence
+        }
+    
+    def _get_explanation(self, features: np.ndarray, prediction: np.ndarray) -> List[Dict]:
+        """
+        Get feature explanation for prediction using SHAP.
+        
+        Returns top 5 features driving the prediction with human-readable names.
+        """
+        # Feature name map for human-readable output
+        FEATURE_NAME_MAP = {
+            'age': 'Patient Age',
+            'gender': 'Gender',
+            'heart_rate': 'Heart Rate (HR)',
+            'bp_systolic': 'Systolic Blood Pressure (SBP)',
+            'bp_diastolic': 'Diastolic Blood Pressure (DBP)',
+            'spo2': 'Blood Oxygen (SpO2)',
+            'temperature': 'Body Temperature',
+            'respiratory_rate': 'Respiratory Rate (RR)',
+            'chest_pain': 'Chest Pain',
+            'arm_pain_left': 'Left Arm Pain',
+            'jaw_pain': 'Jaw Pain',
+            'dyspnea': 'Difficulty Breathing',
+            'shortness_of_breath': 'Shortness of Breath',
+            'facial_droop': 'Facial Droop',
+            'arm_weakness': 'Arm Weakness',
+            'speech_difficulty': 'Speech Difficulty',
+            'abdominal_pain': 'Abdominal Pain',
+            'rigid_abdomen': 'Rigid Abdomen',
+            'altered_mental_status': 'Altered Mental Status',
+            'confusion': 'Confusion',
+            'fever': 'Fever',
+            'nausea': 'Nausea',
+            'vomiting': 'Vomiting',
+            'dizziness': 'Dizziness',
+            'syncope': 'Loss of Consciousness',
+            'headache': 'Headache',
+            'seizure': 'Seizure',
+            'uncontrolled_bleeding': 'Uncontrolled Bleeding',
+            'severe_pain': 'Severe Pain',
+            'cough': 'Cough',
+            'fatigue': 'Fatigue',
+            'symptom_duration_hours': 'Symptom Duration'
+        }
+        
+        # Try to get SHAP explanation from ML model
+        if self.ml_model is not None and hasattr(self.ml_model, 'explain_prediction'):
+            try:
+                shap_explanations = self.ml_model.explain_prediction(features, top_n=5)
+                
+                # Convert to human-readable format
+                explanations = []
+                for exp in shap_explanations:
+                    feature_name = exp.get('feature', 'unknown')
+                    human_name = FEATURE_NAME_MAP.get(feature_name, feature_name.replace('_', ' ').title())
+                    
+                    # Get feature value from input
+                    feature_idx = TRAINING_FEATURE_COLUMNS.index(feature_name) if feature_name in TRAINING_FEATURE_COLUMNS else -1
+                    feature_val = features[0][feature_idx] if feature_idx >= 0 and features.shape[1] > feature_idx else '?'
+                    
+                    # Format based on feature type
+                    if feature_name == 'spo2' and feature_val != '?':
+                        value_str = f"{int(feature_val)}%"
+                        clinical_note = "Critical hypoxia" if feature_val < 90 else ("Low" if feature_val < 95 else "Normal")
+                    elif feature_name == 'heart_rate' and feature_val != '?':
+                        value_str = f"{int(feature_val)} bpm"
+                        clinical_note = "Tachycardia" if feature_val > 100 else ("Bradycardia" if feature_val < 60 else "Normal")
+                    elif feature_name == 'temperature' and feature_val != '?':
+                        value_str = f"{feature_val:.1f}C"
+                        clinical_note = "Fever" if feature_val > 38 else ("Hypothermia" if feature_val < 36 else "Normal")
+                    elif feature_name in ['chest_pain', 'arm_pain_left', 'dyspnea', 'seizure', 'facial_droop']:
+                        value_str = "Present" if feature_val else "Absent"
+                        clinical_note = "Significant finding" if feature_val else ""
+                    else:
+                        value_str = str(feature_val) if feature_val != '?' else 'N/A'
+                        clinical_note = ""
+                    
+                    explanations.append({
+                        'feature': feature_name,
+                        'display_name': human_name,
+                        'value': value_str,
+                        'impact': exp.get('impact', '+'),
+                        'contribution': exp.get('contribution', ''),
+                        'clinical_note': clinical_note
+                    })
+                
+                return explanations
+                
+            except Exception as e:
+                pass  # Fall through to fallback
+        
+        # Fallback: basic explanation without SHAP
+        return [{'feature': 'ml_ensemble', 'display_name': 'ML Prediction', 
+                 'impact': '+', 'value': 'See model confidence', 'clinical_note': ''}]
+    
+    def generate_clinical_narrative(self, patient_data: Dict[str, Any], 
+                                    triage_result: Dict[str, Any]) -> str:
+        """
+        Generate a 2-sentence clinical narrative summary.
+        
+        This bridges the gap between AI output and clinical usability.
+        
+        Parameters:
+        -----------
+        patient_data : Patient vitals and symptoms
+        triage_result : Output from triage() method
+        
+        Returns:
+        --------
+        str : Human-readable clinical summary
+        """
+        age = patient_data.get('age', 'Unknown age')
+        gender = patient_data.get('gender', '')
+        gender_str = 'male' if gender in ['M', 1, 'male'] else 'female' if gender in ['F', 0, 'female'] else 'patient'
+        
+        esi_level = triage_result.get('esi_level', 3)
+        method = triage_result.get('method', 'ML_PREDICTION')
+        confidence = triage_result.get('confidence', 0)
+        
+        # Build vital signs string
+        vitals = []
+        if 'spo2' in patient_data and patient_data['spo2'] < 95:
+            vitals.append(f"SpO2 {patient_data['spo2']}%")
+        if 'heart_rate' in patient_data:
+            hr = patient_data['heart_rate']
+            if hr > 100:
+                vitals.append(f"tachycardia (HR {hr})")
+            elif hr < 60:
+                vitals.append(f"bradycardia (HR {hr})")
+        if 'bp_systolic' in patient_data:
+            sbp = patient_data['bp_systolic']
+            if sbp > 180:
+                vitals.append(f"hypertensive crisis (SBP {sbp})")
+            elif sbp < 90:
+                vitals.append(f"hypotension (SBP {sbp})")
+        if patient_data.get('temperature', 37) > 38.5:
+            vitals.append(f"fever ({patient_data['temperature']}C)")
+        
+        # Build symptoms string
+        symptoms = []
+        symptom_names = {
+            'chest_pain': 'chest pain',
+            'dyspnea': 'difficulty breathing',
+            'facial_droop': 'facial droop',
+            'arm_weakness': 'arm weakness',
+            'speech_difficulty': 'speech difficulty',
+            'seizure': 'seizure activity',
+            'altered_mental_status': 'altered mental status',
+            'uncontrolled_bleeding': 'uncontrolled bleeding'
+        }
+        for sym, name in symptom_names.items():
+            if patient_data.get(sym):
+                symptoms.append(name)
+        
+        # Build narrative based on method
+        if method == 'RULE_BASED':
+            rule_name = triage_result.get('rule_name', 'emergency protocol')
+            protocol = triage_result.get('protocol', 'immediate assessment')
+            
+            findings = vitals + symptoms
+            findings_str = ', '.join(findings[:3]) if findings else 'critical findings'
+            
+            sentence1 = f"This {age}-year-old {gender_str} presents with {findings_str}, triggering the {rule_name.replace('_', ' ').title()} protocol."
+            sentence2 = f"{protocol}"
+        else:
+            # ML prediction
+            findings = vitals + symptoms
+            findings_str = ', '.join(findings[:3]) if findings else 'the presenting symptoms'
+            
+            conf_level = 'high' if confidence > 0.8 else ('moderate' if confidence > 0.6 else 'low')
+            
+            esi_descriptions = {
+                1: "requiring immediate resuscitation",
+                2: "requiring emergent care within 10 minutes",
+                3: "requiring urgent evaluation",
+                4: "with low-acuity concerns",
+                5: "with non-urgent presentation"
+            }
+            
+            sentence1 = f"This {age}-year-old {gender_str} presents with {findings_str}."
+            sentence2 = f"AI triage assessment: ESI Level {esi_level} ({conf_level} confidence), {esi_descriptions.get(esi_level, 'standard assessment indicated')}."
+        
+        return f"{sentence1} {sentence2}"
+    
+    @classmethod
+    def from_trained_models(cls, model_dir: str) -> 'ClinicalSafetyEngine':
+        """
+        Factory method to create ClinicalSafetyEngine from saved model files.
+        
+        Parameters:
+        -----------
+        model_dir : Directory containing esi_ensemble_model.pkl and ood_detector.pkl
+        
+        Returns:
+        --------
+        ClinicalSafetyEngine : Fully initialized engine with loaded models
+        """
+        import os
+        from esi_predictor import ESITriagePredictor
+        from ood_detector import OutOfDistributionDetector
+        
+        ensemble_path = os.path.join(model_dir, 'esi_ensemble_model.pkl')
+        ood_path = os.path.join(model_dir, 'ood_detector.pkl')
+        
+        # Load ML model
+        ml_model = None
+        if os.path.exists(ensemble_path):
+            ml_model = ESITriagePredictor.load(ensemble_path)
+        
+        # Create engine
+        engine = cls(ml_model=ml_model)
+        
+        # Load OOD detector
+        if os.path.exists(ood_path):
+            engine.ood_detector = OutOfDistributionDetector.load(ood_path)
+        
+        return engine
 
 
 # Import numpy for ClinicalSafetyEngine

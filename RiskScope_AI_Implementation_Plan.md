@@ -1,11 +1,11 @@
 # RiskScope AI - Final Implementation Plan
 
-> **🏆 WINNING PROJECT**: Evidence-Based Clinical Triage Assistant  
+> **[WIN] WINNING PROJECT**: Evidence-Based Clinical Triage Assistant  
 > **Team Size**: 4 Members (ML Lead + 2 ML Engineers + 1 Full-Stack Dev)
 
 ---
 
-## 🎯 Problem Statement
+## [AIM] Problem Statement
 
 **"In India's public health system, 60% of emergency department visits are non-urgent, overwhelming doctors and delaying critical care for true emergencies."**
 
@@ -32,22 +32,22 @@
 | **1st Place Probability** | **75%** | MIMIC-IV validation + outcome analysis |
 
 ### What Makes This Achievable
-- ✅ MIMIC-IV data (448,972 real ED visits - publicly available)
-- ✅ LightGBM + Random Forest ensemble (fast training)
-- ✅ 3-layer safety system (rules → OOD detection → ML)
-- ✅ SHAP explainability (doctors trust it)
-- ✅ Synthea backup for rare case augmentation
-- ✅ Demo mode prevents catastrophic failure
+- [OK] MIMIC-IV data (448,972 real ED visits - publicly available)
+- [OK] LightGBM + Random Forest ensemble (fast training)
+- [OK] 3-layer safety system (rules -> OOD detection -> ML)
+- [OK] SHAP explainability (doctors trust it)
+- [OK] Synthea backup for rare case augmentation
+- [OK] Demo mode prevents catastrophic failure
 
 ### Critical Differentiators
-- ✅ **Real clinical ground truth** (not Kaggle toys)
-- ✅ **Validated against nurse expert triage** (Cohen's Kappa >0.80)
-- ✅ **Actual patient outcomes available** (did Level 1 need ICU?)
-- ✅ **Published research credibility** (300+ papers use MIMIC-IV)
+- [OK] **Real clinical ground truth** (not Kaggle toys)
+- [OK] **Validated against nurse expert triage** (Cohen's Kappa >0.80)
+- [OK] **Actual patient outcomes available** (did Level 1 need ICU?)
+- [OK] **Published research credibility** (300+ papers use MIMIC-IV)
 
 ---
 
-## 👥 Team Structure & Roles
+##  Team Structure & Roles
 
 ### Team Member 1: ML Lead (You - Amogh)
 **Focus**: Core ML Model, Safety Layer, Explainability
@@ -106,7 +106,7 @@
 
 ---
 
-## 📋 Pre-Hackathon Setup
+## [DOC] Pre-Hackathon Setup
 
 > **Critical**: Complete these BEFORE the hackathon starts
 
@@ -115,8 +115,8 @@
 □ Install Python 3.10+, create virtual environment
 □ Install Node.js 18+
 □ Get MIMIC-IV access (PhysioNet credentialing - 2-3 days)
-  → https://physionet.org/
-  → Complete CITI training (4 hours, free)
+  -> https://physionet.org/
+  -> Complete CITI training (4 hours, free)
 □ Download MIMIC-IV ED module (2.2 GB)
 □ Clone Synthea for backup: git clone https://github.com/synthetichealth/synthea.git
 
@@ -191,13 +191,13 @@
 
 ---
 
-## 🗓️ Parallel Implementation Plan (4-Member Team)
+## [CALENDAR] Parallel Implementation Plan (4-Member Team)
 
 > **Strategy**: All team members work in parallel with clear interfaces
 
 ---
 
-### 👨‍💻 ML LEAD (Amogh) - Core ML Pipeline
+### [CODE] ML LEAD (Amogh) - Core ML Pipeline
 
 #### Phase 1: Model Architecture (Hours 0-12)
 - [ ] Set up ML project structure (`ml/` directory)
@@ -362,7 +362,7 @@ def explain_prediction(self, patient_features):
 
 ---
 
-### 👥 ML ENGINEERS (2 Members) - Data Pipeline & Features
+###  ML ENGINEERS (2 Members) - Data Pipeline & Features
 
 #### Phase 1: Data Loading & Cleaning (Hours 0-8)
 - [ ] Load MIMIC-IV ED data:
@@ -490,7 +490,7 @@ def evaluate_model(y_true, y_pred):
 
 ---
 
-### 🌐 FULL-STACK DEVELOPER - Frontend + Backend API
+###  FULL-STACK DEVELOPER - Frontend + Backend API
 
 #### Phase 1: Project Setup (Hours 0-4)
 - [ ] Initialize Git repo with project structure:
@@ -562,11 +562,11 @@ def predict():
 - [ ] Multi-step symptom input form
 - [ ] Vital signs entry with validation
 - [ ] ESI result display with color coding:
-  - Level 1: 🔴 Red
-  - Level 2: 🟠 Orange  
-  - Level 3: 🟡 Yellow
-  - Level 4: 🟢 Green
-  - Level 5: 🔵 Blue
+  - Level 1:  Red
+  - Level 2:  Orange  
+  - Level 3:  Yellow
+  - Level 4:  Green
+  - Level 5:  Blue
 - [ ] SHAP explanation visualization (bar chart)
 - [ ] **Checkpoint**: Patient can complete triage in <30 seconds
 
@@ -587,7 +587,7 @@ def predict():
 
 ---
 
-## 🚀 Demo Checkpoints
+## [LAUNCH] Demo Checkpoints
 
 ### Checkpoint v0.1 (Hour 12) - ML Foundation
 **Test with:**
@@ -616,20 +616,20 @@ curl -X POST http://localhost:5000/api/predict \
 
 ---
 
-## 📊 Validation Metrics & Targets
+## [CHART] Validation Metrics & Targets
 
 | Metric | Target | Why |
 |--------|--------|-----|
 | **Cohen's Kappa** | >0.75 | Excellent agreement with nurse triage |
 | **ESI 1-2 Sensitivity** | >95% | Must catch true emergencies |
 | **ESI 1-2 Specificity** | >75% | Avoid over-triage |
-| **Critical Errors** | <0.5% | Level 1 → Level 4+ misclassifications |
+| **Critical Errors** | <0.5% | Level 1 -> Level 4+ misclassifications |
 | **Response Time** | <500ms | Real-time use |
 | **Total Triage Time** | <30s | Including user input |
 
 ---
 
-## 🎤 5-Minute Demo Script
+##  5-Minute Demo Script
 
 ### Slide 1: Problem (30 seconds)
 > "In India's emergency departments, triage delays cost lives. 60% of visits are non-urgent—critical cases wait behind minor complaints. ESI protocol requires trained nurses, but India has 1 nurse per 300 patients."
@@ -646,7 +646,7 @@ Symptoms: Pain radiating to left arm, shortness of breath
 
 [Click "Triage"]
 
-🚨 ESI LEVEL 1 - IMMEDIATE EMERGENCY
+[ALERT] ESI LEVEL 1 - IMMEDIATE EMERGENCY
 Recommendation: ACTIVATE MI PROTOCOL
 
 Why Level 1? [SHAP chart]
@@ -671,14 +671,14 @@ Level 1 (RED): 3 patients
 Level 2 (ORANGE): 7 patients
 ...
 
-[Click patient] → Auto-summary with suggested actions
+[Click patient] -> Auto-summary with suggested actions
 "Doctor sees this in 5 seconds. Immediately knows what to do."
 ```
 
 ### Slide 6: Technical Depth (60 seconds)
 > "- Data: 448K real ED visits (MIMIC-IV)
 > - Models: LightGBM + RF ensemble, 73 features
-> - Safety: 3-layer architecture (Rules → OOD → ML)
+> - Safety: 3-layer architecture (Rules -> OOD -> ML)
 > - Explainability: SHAP for every prediction
 > - <500ms response, deployed on Vercel + Railway"
 
@@ -688,7 +688,7 @@ Level 2 (ORANGE): 7 patients
 
 ---
 
-## 🎯 Judge Q&A Responses
+## [AIM] Judge Q&A Responses
 
 **Q: "What if your model is wrong and someone dies?"**
 > "That's why we built a 3-layer safety system. Layer 1 is hard-coded emergency rules—these CANNOT fail. Layer 2 is OOD detection—unusual cases escalate automatically. Our system is decision support, not autonomous—doctors make final calls. Zero deaths in misclassified cases during validation."
@@ -704,7 +704,7 @@ Level 2 (ORANGE): 7 patients
 
 ---
 
-## 📁 Project Structure
+## [FOLDER] Project Structure
 
 ```
 riskscope-ai/
@@ -724,7 +724,7 @@ riskscope-ai/
 │   ├── app.py                  # Flask API
 │   ├── safety_engine.py        # Emergency rules
 │   ├── model_loader.py         # Load ML model
-│   ├── feature_engineer.py     # Input → features
+│   ├── feature_engineer.py     # Input -> features
 │   ├── requirements.txt
 │   └── models/
 │       ├── esi_model.pkl
@@ -751,7 +751,7 @@ riskscope-ai/
 
 ---
 
-## ✅ Final Checklist
+## [OK] Final Checklist
 
 ### Before Hackathon
 - [ ] MIMIC-IV data downloaded and cleaned
@@ -969,7 +969,7 @@ function DoctorDashboard() {
     <div className="dashboard">
       <header>
         <h1>Patient Queue</h1>
-        <button onClick={refreshQueue}>🔄 Refresh</button>
+        <button onClick={refreshQueue}>[REFRESH] Refresh</button>
       </header>
       
       <div className="queue">
@@ -986,10 +986,10 @@ function DoctorDashboard() {
 
 ---
 
-### 🚨 DEMO CHECKPOINT v0.5 (Hour 32)
+### [ALERT] DEMO CHECKPOINT v0.5 (Hour 32)
 
 **What should work:**
-- Patient can enter symptoms → Get ESI result
+- Patient can enter symptoms -> Get ESI result
 - Explanation shows why
 - Doctor dashboard shows queue (manual refresh)
 
@@ -1012,7 +1012,7 @@ cd backend && railway up
 - [ ] Test production endpoints
 - [ ] **Checkpoint**: Live URL works
 
-#### Hour 34-36: Demo Prep ⏱️ CRITICAL
+#### Hour 34-36: Demo Prep [TIME] CRITICAL
 - [ ] Practice demo script 5+ times
 - [ ] Record backup video at Hour 34
 - [ ] Prepare Q&A answers (see below)
@@ -1032,7 +1032,7 @@ cd backend && railway up
 "Let me show you a suspected heart attack..."
 
 [Enter: Age 58, Male, Chest pain, HR 105, BP 160/95, SpO2 94%]
-[Check: Chest pain ✓, Left arm pain ✓]
+[Check: Chest pain [OK], Left arm pain [OK]]
 [Click Triage]
 
 [Result appears]
@@ -1107,7 +1107,7 @@ RiskScope-AI/
 │   ├── data/
 │   │   └── training_data.csv
 │   ├── train_model.py
-│   ├── generate_data.py          # Synthea → CSV
+│   ├── generate_data.py          # Synthea -> CSV
 │   └── evaluate.py
 │
 ├── demo_cases.json               # 5 test scenarios
@@ -1120,10 +1120,10 @@ RiskScope-AI/
 
 | Cut | Time Saved | Impact |
 |-----|------------|--------|
-| ❌ Real-time dashboard polling | 3 hrs | Low - manual refresh works |
-| ❌ SHAP waterfall charts | 2 hrs | Low - simple list is enough |
-| ❌ Framer Motion animations | 1.5 hrs | Zero - judges don't care |
-| ❌ Mobile responsive | 2 hrs | Zero - demo is on laptop |
+| [X] Real-time dashboard polling | 3 hrs | Low - manual refresh works |
+| [X] SHAP waterfall charts | 2 hrs | Low - simple list is enough |
+| [X] Framer Motion animations | 1.5 hrs | Zero - judges don't care |
+| [X] Mobile responsive | 2 hrs | Zero - demo is on laptop |
 | **TOTAL** | **8.5 hrs** | **Minimal judge impact** |
 
 ---
@@ -1131,17 +1131,17 @@ RiskScope-AI/
 ## Failure Mitigation
 
 ### If Synthea Generation Fails
-→ Use pre-generated 1000-patient dataset (create during pre-hackathon)
+-> Use pre-generated 1000-patient dataset (create during pre-hackathon)
 
 ### If SHAP Crashes
-→ Fallback to feature importance (already implemented in code above)
+-> Fallback to feature importance (already implemented in code above)
 
 ### If Frontend-Backend CORS Fails
-→ Test at Hour 22 with curl BEFORE building React integration
+-> Test at Hour 22 with curl BEFORE building React integration
 
 ### If Demo Crashes on Stage
-→ Toggle `DEMO_MODE = True` for hardcoded responses
-→ Play backup video recorded at Hour 34
+-> Toggle `DEMO_MODE = True` for hardcoded responses
+-> Play backup video recorded at Hour 34
 
 ### If Model Accuracy is Low
-→ Emphasize rule-based layer: "94% of Level 1 cases are caught by rules, not ML"
+-> Emphasize rule-based layer: "94% of Level 1 cases are caught by rules, not ML"

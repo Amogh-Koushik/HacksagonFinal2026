@@ -85,16 +85,16 @@ class ConfidenceCalibrator:
         runner_up_class = int(np.argsort(proba)[-2])
 
         # Calibrated confidence: weighted combination of signals
-        # Higher max_prob → higher confidence
-        # Lower entropy → higher confidence
-        # Higher margin → higher confidence
+        # Higher max_prob -> higher confidence
+        # Lower entropy -> higher confidence
+        # Higher margin -> higher confidence
         max_entropy = np.log(5)  # ~1.609
         normalized_entropy = entropy / max_entropy  # 0 to 1
 
         calibrated = (
             0.50 * max_prob +
             0.25 * (1 - normalized_entropy) +
-            0.25 * min(margin / 0.5, 1.0)  # margin of 0.5+ → full confidence
+            0.25 * min(margin / 0.5, 1.0)  # margin of 0.5+ -> full confidence
         )
         calibrated = float(np.clip(calibrated, 0, 1))
 

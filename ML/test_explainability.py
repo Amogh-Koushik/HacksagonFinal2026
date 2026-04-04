@@ -45,10 +45,10 @@ def run_tests():
     for feat in key_features:
         total += 1
         if feat in FEATURE_DISPLAY_NAMES:
-            print(f"  ✅ {feat:30s} → {FEATURE_DISPLAY_NAMES[feat]}")
+            print(f"  [OK] {feat:30s} -> {FEATURE_DISPLAY_NAMES[feat]}")
             passed += 1
         else:
-            print(f"  ❌ {feat:30s} → MISSING from display names")
+            print(f"  [X] {feat:30s} -> MISSING from display names")
             failed += 1
 
     # Check we have mappings for raw symptoms
@@ -60,10 +60,10 @@ def run_tests():
     ]
     mapped = sum(1 for s in symptom_features if s in FEATURE_DISPLAY_NAMES)
     if mapped == len(symptom_features):
-        print(f"  ✅ All {mapped} symptom features have display names")
+        print(f"  [OK] All {mapped} symptom features have display names")
         passed += 1
     else:
-        print(f"  ❌ Only {mapped}/{len(symptom_features)} symptoms mapped")
+        print(f"  [X] Only {mapped}/{len(symptom_features)} symptoms mapped")
         failed += 1
 
     # =====================================================================
@@ -79,10 +79,10 @@ def run_tests():
     for ctx in expected_contexts:
         total += 1
         if ctx in CLINICAL_CONTEXT:
-            print(f"  ✅ {ctx:30s} → context defined")
+            print(f"  [OK] {ctx:30s} -> context defined")
             passed += 1
         else:
-            print(f"  ❌ {ctx:30s} → MISSING clinical context")
+            print(f"  [X] {ctx:30s} -> MISSING clinical context")
             failed += 1
 
     # =====================================================================
@@ -103,18 +103,18 @@ def run_tests():
         top_n=3
     )
     if 'top_features' in result and len(result['top_features']) == 3:
-        print(f"  ✅ Basic explain: {len(result['top_features'])} features returned")
+        print(f"  [OK] Basic explain: {len(result['top_features'])} features returned")
         passed += 1
     else:
-        print(f"  ❌ Basic explain failed: {result}")
+        print(f"  [X] Basic explain failed: {result}")
         failed += 1
 
     total += 1
     if result.get('risk_summary'):
-        print(f"  ✅ Risk summary: '{result['risk_summary'][:50]}...'")
+        print(f"  [OK] Risk summary: '{result['risk_summary'][:50]}...'")
         passed += 1
     else:
-        print(f"  ❌ Missing risk summary")
+        print(f"  [X] Missing risk summary")
         failed += 1
 
     # =====================================================================
@@ -130,11 +130,11 @@ def run_tests():
     proba = np.array([0.0, 0.0, 0.0, 0.02, 0.98])
     cal = calibrator.calibrate(proba)
     if cal['confidence'] > 0.85 and not cal['should_escalate']:
-        print(f"  ✅ Very high conf:   {cal['confidence']:.3f}, "
+        print(f"  [OK] Very high conf:   {cal['confidence']:.3f}, "
               f"entropy={cal['entropy']:.3f}, margin={cal['margin']:.3f}")
         passed += 1
     else:
-        print(f"  ❌ Very high conf failed: {cal}")
+        print(f"  [X] Very high conf failed: {cal}")
         failed += 1
 
     # Moderate confidence
@@ -142,11 +142,11 @@ def run_tests():
     proba = np.array([0.05, 0.10, 0.60, 0.15, 0.10])
     cal = calibrator.calibrate(proba)
     if 0.4 < cal['confidence'] < 0.9:
-        print(f"  ✅ Moderate conf:    {cal['confidence']:.3f}, "
+        print(f"  [OK] Moderate conf:    {cal['confidence']:.3f}, "
               f"entropy={cal['entropy']:.3f}")
         passed += 1
     else:
-        print(f"  ❌ Moderate conf failed: {cal}")
+        print(f"  [X] Moderate conf failed: {cal}")
         failed += 1
 
     # Very low confidence (uniform distribution)
@@ -154,30 +154,30 @@ def run_tests():
     proba = np.array([0.20, 0.20, 0.20, 0.20, 0.20])
     cal = calibrator.calibrate(proba)
     if cal['should_escalate'] and cal['confidence'] < 0.5:
-        print(f"  ✅ Uniform dist:     {cal['confidence']:.3f}, "
+        print(f"  [OK] Uniform dist:     {cal['confidence']:.3f}, "
               f"escalate={cal['should_escalate']}")
         passed += 1
     else:
-        print(f"  ❌ Uniform dist failed: {cal}")
+        print(f"  [X] Uniform dist failed: {cal}")
         failed += 1
 
     # Test class probabilities output
     total += 1
     if 'class_probabilities' in cal and len(cal['class_probabilities']) == 5:
-        print(f"  ✅ Class probs:      {cal['class_probabilities']}")
+        print(f"  [OK] Class probs:      {cal['class_probabilities']}")
         passed += 1
     else:
-        print(f"  ❌ Missing class probabilities")
+        print(f"  [X] Missing class probabilities")
         failed += 1
 
     # Test display helper
     total += 1
     display = calibrator.get_confidence_display(cal)
     if display['level'] in ['HIGH', 'MODERATE', 'LOW'] and display['color']:
-        print(f"  ✅ Display:          {display['level']} ({display['color']})")
+        print(f"  [OK] Display:          {display['level']} ({display['color']})")
         passed += 1
     else:
-        print(f"  ❌ Display failed: {display}")
+        print(f"  [X] Display failed: {display}")
         failed += 1
 
     # Entropy calculation sanity check
@@ -187,11 +187,11 @@ def run_tests():
     cal_uniform = calibrator.calibrate(uniform)
     cal_certain = calibrator.calibrate(certain)
     if cal_uniform['entropy'] > cal_certain['entropy']:
-        print(f"  ✅ Entropy ordering: uniform({cal_uniform['entropy']:.3f}) > "
+        print(f"  [OK] Entropy ordering: uniform({cal_uniform['entropy']:.3f}) > "
               f"certain({cal_certain['entropy']:.3f})")
         passed += 1
     else:
-        print(f"  ❌ Entropy ordering wrong")
+        print(f"  [X] Entropy ordering wrong")
         failed += 1
 
     # =====================================================================
@@ -228,53 +228,53 @@ def run_tests():
                 features, patient, predicted_esi=1, top_n=5
             )
             if result['top_features'] and len(result['top_features']) == 5:
-                print(f"  ✅ SHAP explain: {len(result['top_features'])} features")
+                print(f"  [OK] SHAP explain: {len(result['top_features'])} features")
                 for feat in result['top_features']:
                     print(f"     {feat['impact']} {feat['display_name']:30s} "
                           f"(SHAP={feat['shap_value']:.4f})")
                 passed += 1
             else:
-                print(f"  ❌ SHAP explain failed")
+                print(f"  [X] SHAP explain failed")
                 failed += 1
 
             # Clinical notes
             total += 1
             if result.get('clinical_notes'):
-                print(f"  ✅ Clinical notes: {len(result['clinical_notes'])}")
+                print(f"  [OK] Clinical notes: {len(result['clinical_notes'])}")
                 for note in result['clinical_notes'][:3]:
                     print(f"     • {note[:60]}")
                 passed += 1
             else:
-                print(f"  ✅ No clinical notes (may be expected for this feature set)")
+                print(f"  [OK] No clinical notes (may be expected for this feature set)")
                 passed += 1
 
             # Risk summary
             total += 1
             if result.get('risk_summary'):
-                print(f"  ✅ Risk summary: {result['risk_summary'][:60]}")
+                print(f"  [OK] Risk summary: {result['risk_summary'][:60]}")
                 passed += 1
             else:
-                print(f"  ❌ Missing risk summary")
+                print(f"  [X] Missing risk summary")
                 failed += 1
 
             # Waterfall data
             total += 1
             waterfall = engine.get_waterfall_data(features)
             if waterfall and 'shap_values' in waterfall:
-                print(f"  ✅ Waterfall data: {len(waterfall['shap_values'])} values")
+                print(f"  [OK] Waterfall data: {len(waterfall['shap_values'])} values")
                 passed += 1
             else:
-                print(f"  ⚠️  Waterfall data unavailable (SHAP may not be initialized)")
+                print(f"  [!]  Waterfall data unavailable (SHAP may not be initialized)")
                 passed += 1  # Non-critical
 
         except Exception as e:
-            print(f"  ❌ Model-based tests failed: {e}")
+            print(f"  [X] Model-based tests failed: {e}")
             import traceback
             traceback.print_exc()
             failed += 1
             total += 1
     else:
-        print("  ⚠️  Skipping (model file not found)")
+        print("  [!]  Skipping (model file not found)")
 
     # ----- SUMMARY -----
     print("\n" + "=" * 64)
@@ -284,9 +284,9 @@ def run_tests():
     print(f"  Failed: {failed}/{total}")
 
     if failed == 0:
-        print("\n  ✅ ALL EXPLAINABILITY TESTS PASSED")
+        print("\n  [OK] ALL EXPLAINABILITY TESTS PASSED")
     else:
-        print(f"\n  ❌ {failed} TEST(S) FAILED")
+        print(f"\n  [X] {failed} TEST(S) FAILED")
 
     print("=" * 64)
 

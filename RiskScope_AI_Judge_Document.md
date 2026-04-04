@@ -45,7 +45,7 @@
 ### Core Concept
 
 ```
-Patient Input → Safety Rules → ML Prediction → Confidence Check → Explainable Output
+Patient Input -> Safety Rules -> ML Prediction -> Confidence Check -> Explainable Output
 ```
 
 ### The 4-Layer Safety System
@@ -58,14 +58,14 @@ We do NOT trust AI blindly. Our architecture ensures life-threatening cases are 
 ├─────────────────────────────────────────────────────────────────────────┤
 │  Hard-coded medical rules based on ACLS/ESI protocols:                  │
 │                                                                         │
-│  • Chest pain + arm radiation → ESI 1 (Suspected MI)                    │
-│  • SpO2 < 90% → ESI 1 (Respiratory Failure)                             │
-│  • Facial droop OR arm weakness OR speech difficulty → ESI 1 (Stroke)   │
-│  • Systolic BP < 90 + HR > 100 → ESI 1 (Shock)                          │
-│  • Temp > 38.3°C + HR > 90 + Confusion → ESI 1 (Sepsis)                 │
+│  • Chest pain + arm radiation -> ESI 1 (Suspected MI)                    │
+│  • SpO2 < 90% -> ESI 1 (Respiratory Failure)                             │
+│  • Facial droop OR arm weakness OR speech difficulty -> ESI 1 (Stroke)   │
+│  • Systolic BP < 90 + HR > 100 -> ESI 1 (Shock)                          │
+│  • Temp > 38.3°C + HR > 90 + Confusion -> ESI 1 (Sepsis)                 │
 │                                                                         │
 │  WHY: These rules are medical consensus. No ML uncertainty.             │
-│  If triggered → Return ESI 1 IMMEDIATELY, bypass ML entirely.           │
+│  If triggered -> Return ESI 1 IMMEDIATELY, bypass ML entirely.           │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼ (Only if no emergency rule triggers)
@@ -243,11 +243,11 @@ SHAP Output:
 ┌────────────────────────────────────────────────────────────┐
 │  Base value (average ESI): 3.2                             │
 │                                                            │
-│  + chest_pain:        +0.85  →  pushes toward ESI 1        │
-│  + age (58):          +0.32  →  older = higher risk        │
-│  + heart_rate (105):  +0.28  →  tachycardia = concerning   │
-│  + arm_pain_left:     +0.45  →  radiation = MI red flag    │
-│  - spo2 (94%):        +0.15  →  borderline, adds risk      │
+│  + chest_pain:        +0.85  ->  pushes toward ESI 1        │
+│  + age (58):          +0.32  ->  older = higher risk        │
+│  + heart_rate (105):  +0.28  ->  tachycardia = concerning   │
+│  + arm_pain_left:     +0.45  ->  radiation = MI red flag    │
+│  - spo2 (94%):        +0.15  ->  borderline, adds risk      │
 │  ─────────────────────────────────────────────────────────│
 │  Final prediction:     ESI 1  (confidence: 94%)            │
 └────────────────────────────────────────────────────────────┘
@@ -300,8 +300,8 @@ def explain_prediction(model, features, feature_names):
 
 | Failure Mode | Frequency | Mitigation |
 |--------------|-----------|------------|
-| **Atypical MI presentation** | ~8% of MI patients lack classic symptoms | Age >65 + any cardiac symptom → auto-escalate |
-| **Rare conditions** | Ectopic pregnancy, testicular torsion | Specific symptom combinations → flag for review |
+| **Atypical MI presentation** | ~8% of MI patients lack classic symptoms | Age >65 + any cardiac symptom -> auto-escalate |
+| **Rare conditions** | Ectopic pregnancy, testicular torsion | Specific symptom combinations -> flag for review |
 | **Psychiatric overlap** | Panic attack mimics MI | Always escalate chest pain with any cardiac risk factor |
 | **Pediatric patients** | Different vital sign norms | Age-adjusted vital sign thresholds (planned) |
 
@@ -484,13 +484,13 @@ Response:
 
 **RiskScope AI** is not just an ML project with a healthcare theme. It's a **clinically-grounded, safety-first triage system** that:
 
-1. ✅ Solves a **real problem** (triage delays cause preventable deaths)
-2. ✅ Uses **established protocol** (ESI, not a custom invention)
-3. ✅ Has **safety architecture** (rules before ML, confidence escalation)
-4. ✅ Provides **explainability** (SHAP-based feature attribution)
-5. ✅ Acknowledges **limitations** (synthetic data, needs validation)
-6. ✅ Has a **regulatory path** (Class II/IIa medical device)
-7. ✅ Demonstrates **technical depth** (ensemble ML, feature engineering, risk scores)
-8. ✅ Is **honest about scope** (assist, not replace; prioritize, not diagnose)
+1. [OK] Solves a **real problem** (triage delays cause preventable deaths)
+2. [OK] Uses **established protocol** (ESI, not a custom invention)
+3. [OK] Has **safety architecture** (rules before ML, confidence escalation)
+4. [OK] Provides **explainability** (SHAP-based feature attribution)
+5. [OK] Acknowledges **limitations** (synthetic data, needs validation)
+6. [OK] Has a **regulatory path** (Class II/IIa medical device)
+7. [OK] Demonstrates **technical depth** (ensemble ML, feature engineering, risk scores)
+8. [OK] Is **honest about scope** (assist, not replace; prioritize, not diagnose)
 
 > **Our ask**: Judge us not on AI hype, but on whether we've built something that could actually help an overwhelmed emergency department save lives.

@@ -7,11 +7,11 @@
 └─────────────────────────────────────────────────────────────────────────────┘
 
 
-                              👤 PATIENT ARRIVES
+                               PATIENT ARRIVES
                                      │
                                      ▼
                     ┌─────────────────────────────┐
-                    │    📱 QUICK SCREENING       │
+                    │     QUICK SCREENING       │
                     │         (30 seconds)        │
                     │                             │
                     │  • Enter symptoms           │
@@ -21,7 +21,7 @@
                                    │
                                    ▼
                     ┌─────────────────────────────┐
-                    │     🤖 RISKSCOPE AI         │
+                    │     [AI] RISKSCOPE AI         │
                     │    TRIAGE ENGINE            │
                     │                             │
                     │  • Checks for danger signs  │
@@ -32,7 +32,7 @@
                                    │
                                    ▼
                     ┌─────────────────────────────┐
-                    │    📊 PRIORITY ASSIGNED     │
+                    │    [CHART] PRIORITY ASSIGNED     │
                     │                             │
                     │    ESI Level 1-5            │
                     │    + Reason "Why?"          │
@@ -44,7 +44,7 @@
          ▼                         ▼                         ▼
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
-│   🔴 LEVEL 1    │     │   🟡 LEVEL 3    │     │   🟢 LEVEL 5    │
+│    LEVEL 1    │     │    LEVEL 3    │     │    LEVEL 5    │
 │   IMMEDIATE     │     │     URGENT      │     │   NON-URGENT    │
 │                 │     │                 │     │                 │
 │  See doctor     │     │  See within     │     │  Wait in        │
@@ -56,21 +56,21 @@
                                  │
                                  ▼
                     ┌─────────────────────────────┐
-                    │  👨‍⚕️ DOCTOR DASHBOARD        │
+                    │  [HEALTH] DOCTOR DASHBOARD        │
                     │                             │
                     │  Patients sorted by         │
                     │  PRIORITY, not arrival      │
                     │                             │
-                    │  🔴 Level 1:  2 patients    │
-                    │  🟠 Level 2:  3 patients    │
-                    │  🟡 Level 3:  5 patients    │
-                    │  🟢 Level 4:  4 patients    │
-                    │  🔵 Level 5:  8 patients    │
+                    │   Level 1:  2 patients    │
+                    │   Level 2:  3 patients    │
+                    │   Level 3:  5 patients    │
+                    │   Level 4:  4 patients    │
+                    │   Level 5:  8 patients    │
                     └──────────────┬──────────────┘
                                    │
                                    ▼
                     ┌─────────────────────────────┐
-                    │  👨‍⚕️ DOCTOR SEES PATIENT     │
+                    │  [HEALTH] DOCTOR SEES PATIENT     │
                     │                             │
                     │  • Views AI assessment      │
                     │  • Sees explanation         │
@@ -80,7 +80,7 @@
                                    │
                                    ▼
                     ┌─────────────────────────────┐
-                    │      ✅ OUTCOME             │
+                    │      [OK] OUTCOME             │
                     │                             │
                     │  • Sickest patients         │
                     │    treated FIRST            │
@@ -93,11 +93,11 @@
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              KEY BENEFIT                                     │
 │                                                                              │
-│     ⏱️  10 MINUTES → 30 SECONDS                                             │
+│     [TIME]  10 MINUTES -> 30 SECONDS                                             │
 │                                                                              │
-│     ❌  "First come, first served"  →  ✅  "Sickest first"                  │
+│     [X]  "First come, first served"  ->  [OK]  "Sickest first"                  │
 │                                                                              │
-│     💡  AI assists  →  Doctor decides  →  Patient benefits                  │
+│     [TIP]  AI assists  ->  Doctor decides  ->  Patient benefits                  │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
